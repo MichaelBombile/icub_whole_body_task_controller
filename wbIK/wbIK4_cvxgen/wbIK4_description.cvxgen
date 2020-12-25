@@ -1,0 +1,81 @@
+# Produced by CVXGEN, 2020-09-09 01:55:57 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2020-08-19 11:45:48 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  # number of joints and task dimension
+  nq = 29
+  nt = 36 #65 #30, 36
+  # number of DoF in each block
+  nB = 6
+  nT = 3
+  nLH = 7
+  nRH = 7
+  nLL = 6
+  nRL = 6
+  nCM = 6
+  # block indices in acceleration vector
+
+  # row postion of the ith Jacobian in the task
+
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Q(nq+6,nq+6) psd   #  qdot
+  #- Gradiant vector   : linear cost term.
+  P(nq+6)     #
+  #-Inequality Constraints
+  NeJc[i](nq+6), i=1..6  # Normal * J_SoT xy com
+  sMDw[i](nq+6), i=1..5  # Normal * ssp polygon
+  #-constraint vector
+  deXc(6)               # de + Ne*(Xrf - X0_com)
+  deXc2(6)               # de + Ne*(Xrf - X0_com-\varPhi)
+  sdw(5)                # distance to ssp polygon
+  #- joint limits constraints
+  dt nonnegative       # controller period (for integration)
+  #- positioin constraints
+  qmin(nq)          # maximum joint position
+  qmax(nq)          # maximum joint position
+end
+
+variables
+  qdot(nq+6)  #  acceleration
+end
+
+minimize
+  quad(qdot, Q) + P'*qdot
+subject to
+  # Constraints on CoM
+  sum[j=1..nq+6](NeJc[i][j] * dt * qdot[j]) <= deXc[i], i=1..6
+  # Constraints on 0-step capturability
+  sum[j=1..nq+6](NeJc[i][j] * dt * qdot[j]) <= deXc2[i], i=1..6
+  # constraints of self colision avoidance with stance foot
+  sum[j=1..nq+6](sMDw[i][j] * dt * qdot[j]) <= sdw[i], i=1..5
+  # joint limit constraints
+  qmin[i] <=  dt * qdot[i+nB] <= qmax[i], i=1..nq       # joints position limitis
+end

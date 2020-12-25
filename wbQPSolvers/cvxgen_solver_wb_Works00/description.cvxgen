@@ -1,0 +1,190 @@
+# Produced by CVXGEN, 2020-02-23 16:07:58 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2020-02-21 17:35:55 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-04-22 12:50:58 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-04-21 15:31:35 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2018-11-14 08:50:38 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  # number of joints and task dimension
+  nq = 29
+  nt = 82 #70 #65 #30, 36
+  # number of DoF in each block
+  nB = 6
+  nT = 3
+  nLH = 7
+  nRH = 7
+  nLL = 6
+  nRL = 6
+  # block indices in acceleration vector
+  iB=0
+  iT = 6
+  iLH = 9
+  iRH = 16
+  iLL = 23
+  iRL = 29
+  # row postion of the ith Jacobian in the task
+  rC = 0
+  rLH = 6
+  rRH = 12
+  rLL = 18
+  rRL = 24
+  rW = 30
+  rq = 36
+  rcl = 65
+  rcr = 67
+  rwd = 69
+  rVLF =70
+  rVRF =76
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Qx(nq+6) nonnegative   #  qddot
+  Qy(nq) nonnegative    #  tau
+  Qz(12) nonnegative   #  lambda
+  Qw(nt) nonnegative   #  slack e
+  #- Gradiant vector   : linear cost term.
+  px(nq+6)
+  #py(nq)
+  #pz(12)
+  #pw(nt)
+
+  #-Equality Constraints
+  #-constraint matrix
+  M[i] (nq+6), i=1..nq+6  # Inertia matrix
+  Jt[i](nq+6), i=1..nq+6  # JSoT
+  F[i](6), i=1..2         # Feet contact forces
+  XJbL[i](6), i=1..6      # c_X^-T_b * Jc^T_b Left
+  XJbR[i](6), i=1..6      # c_X^-T_b * Jc^T_b right
+  #-constraint vector
+  b1(nq+6)             # -h_b + Jf^T_b * F_m
+  b2(6)                # Hdot_d -  c_X^-T_b *Jf^T_b * F_m - Gf
+  b3(nt)               # Xddot_d - dot_JSoT * dot_q
+  b4(12)               # Xdot_d - JSoT * dot_q_0
+  b4(12)
+
+  #- torque constraints
+  T_max(nq)            # maximum torque
+  #- velocity constraints
+  v_max(nq)           # maximum joint velocity
+  dt nonnegative       # controller period (for integration)
+  #- positioin constraints
+  q_max(nq)          # maximum joint position
+  q_min(nq)          # maximum joint position
+  #- contact constraints
+  CL[i](6), i=1..11             # contact constraint matrix left foot
+  CR[i](6), i=1..11             # contact constraint matrix left foot
+  # activation of feet contact
+  aL nonnegative
+  aR nonnegative
+
+  # desired CoP in foot frame
+  dwd nonnegative  # desired weight distribution
+  copMxl[i](6), i=1..6   # CoP constraint matrix lfoot
+  copMxr[i](6), i=1..6   # CoP constraint matrix rfoot
+  aw nonnegative         # active of weight distribution
+
+end
+
+variables
+  x(nq+6)  #  acceleration
+  y(nq)  #  torque
+  z(12)  #  contact forces
+  w(nt)  #  slack variables
+
+end
+
+minimize
+  Qx'*square(x) + Qy'*square(y) +  Qz'*square(z) +  Qw'*square(w)
+
+subject to
+  # Dynamics constraints
+  sum[j=iB+1..iB+nq+6](M[i][j]*x[j])-sum[j=1..3](aL*Jt[rLL+j][i]*z[j] + aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iB+1..iB+3                                # Linear dof of the base
+  sum[j=iB+1..iB+nq+6](M[i][j]*x[j])-sum[j=1..6](aL*Jt[rLL+j][i]*z[j] + aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iB+4..iB+6                                # angular dof of the base
+  sum[j=iB+1..iB+nB+nT+nLH+nRH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iT+1..iT+nT                                                                      # Torso  joints
+  sum[j=iB+1..iB+nB+nT](M[i][j]*x[j]) + sum[j=iLH+1..iLH+nLH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iLH+1..iLH+nLH                                     # Left arm joints
+  sum[j=iB+1..iB+nB+nT](M[i][j]*x[j]) + sum[j=iRH+1..iRH+nRH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iRH+1..iRH+nRH                                     # right arm joints
+  sum[j=iB+1..iB+nB](M[i][j]*x[j]) + sum[j=iLL+1..iLL+nLL](M[i][j]*x[j]) - y[i-nB] -sum[j=1..6](aL*Jt[rLL+j][i]*z[j]) == b1[i], i=iLL+1..iLL+nLL      # Left leg joints
+  sum[j=iB+1..iB+nB](M[i][j]*x[j]) + sum[j=iRL+1..iRL+nRL](M[i][j]*x[j]) - y[i-nB] -sum[j=1..6](aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iRL+1..iRL+nRL    # right leg joints
+
+  # constraints of time variation of momemtum
+  sum[j=1..6](aL*XJbL[i][j]*z[j] + aR*XJbR[i][j]*z[6+j]) + w[rW+i]== b2[i], i=1..6
+
+  # constraint on the acceleration task
+  sum[j=iB+1..iB+nq+6](Jt[rC+i][j]*x[j])   + w[rC+i] == b3[rC+i], i=1..6                                                     # center of mass
+  sum[j=iB+1..iB+nB+nT](Jt[rLH+i][j]*x[j]) + sum[j=iLH+1..iLH+nLH](Jt[rLH+i][j]*x[j]) + w[rLH+i] == b3[rLH+i], i=1..6        # left hand
+  sum[j=iB+1..iB+nB+nT](Jt[rRH+i][j]*x[j]) + sum[j=iRH+1..iRH+nRH](Jt[rRH+i][j]*x[j]) + w[rRH+i] == b3[rRH+i], i=1..6        # right hand
+  sum[j=iB+1..iB+nB](Jt[rLL+i][j]*x[j])    + sum[j=iLL+1..iLL+nLL](Jt[rLL+i][j]*x[j]) + w[rLL+i] == b3[rLL+i], i=1..6        # left foot
+  sum[j=iB+1..iB+nB](Jt[rRL+i][j]*x[j])    + sum[j=iRL+1..iRL+nRL](Jt[rRL+i][j]*x[j]) + w[rRL+i] == b3[rRL+i], i=1..6        # right foot
+  x[6+i] + w[rq+i] == b3[rq+i], i=1..nq
+
+  # CoP constraints
+  sum[j=1..6](copMxl[i][j]*z[j]) + w[rcl+i]== 0, i=1..2
+  sum[j=1..6](copMxr[i][j]*z[6+j]) + w[rcr+i]== 0, i=1..2
+
+  # Weight distribution
+  aw*dwd*z[3] - aw*(1-dwd)*z[6+3] + w[rwd]== 0   # desired weight distribution right foot dwd= Ff_right/(Ff_left+Ff_right)
+
+  # feet foot velocity constraints
+  sum[j=iB+1..iB+nB](Jt[rLL+i][j]*dt *x[j])    + sum[j=iLL+1..iLL+nLL](Jt[rLL+i][j]*dt *x[j]) + w[rVLF+i] == b4[i], i=1..6        # left foot  Velocity constraints
+  sum[j=iB+1..iB+nB](Jt[rRL+i][j]*dt *x[j])    + sum[j=iRL+1..iRL+nRL](Jt[rRL+i][j]*dt *x[j]) + w[rVRF+i] == b4[6+i], i=1..6        # right foot Velocity constraints
+
+  # - joints torque, velocity, position limits
+  -T_max <= y <= T_max                                       # torque limits
+  -v_max[i] <= dt * x[i+nB] <= v_max[i], i=1..nq             # joints velocity limits
+  q_min[i] <= (1/2)*dt*dt*x[i+nB] <= q_max[i], i=1..nq       # joints position limitis
+
+  # contcat forces constraints
+  sum[j=1..6](CL[i][j] * z[j]) <= 0, i=1..11
+  sum[j=1..6](CR[i][j] * z[6+j]) <= 0, i=1..11
+
+end

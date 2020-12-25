@@ -1,0 +1,55 @@
+# Produced by CVXGEN, 2020-08-23 02:50:49 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  # number of joints and task dimension
+  nq = 12
+  # number of DoF in each block
+  nB = 6
+
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Q(nq+6,nq+6) psd   #  qdot
+  #- Gradiant vector   : linear cost term.
+  P(nq+6)     #
+  #-Inequality Constraints
+  NeJc[i](nq+6), i=1..6  # Normal * J_SoT xy com
+  #-constraint vector
+  deXc(6)               # de + Ne*(Xrf - X0_com)
+  #- joint limits constraints
+  dt nonnegative       # controller period (for integration)
+  #- positioin constraints
+  qmin(nq)          # maximum joint position
+  qmax(nq)          # maximum joint position
+end
+
+variables
+  qdot(nq+6)  #  acceleration
+end
+
+minimize
+  quad(qdot, Q) + P'*qdot
+subject to
+  # Constraints on CoM
+  sum[j=1..nq+6](NeJc[i][j] * dt * qdot[j]) <= deXc[i], i=1..6
+  # joint limit constraints
+  qmin[i] <=  dt * qdot[i+nB] <= qmax[i], i=1..nq       # joints position limitis
+end

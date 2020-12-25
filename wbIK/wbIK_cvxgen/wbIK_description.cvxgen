@@ -1,0 +1,106 @@
+# Produced by CVXGEN, 2020-02-23 10:59:11 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2020-02-12 05:08:23 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  # number of joints and task dimension
+  nq = 29
+  nt = 36 #65 #30, 36
+  # number of DoF in each block
+  nB = 6
+  nT = 3
+  nLH = 7
+  nRH = 7
+  nLL = 6
+  nRL = 6
+  nCM = 6
+  # block indices in acceleration vector
+  iB  = 0
+  iT  = 6
+  iLH = 9
+  iRH = 16
+  iLL = 23
+  iRL = 29
+  # row postion of the ith Jacobian in the task
+  rLH = 0
+  rRH = 6
+  rLL = 12
+  rRL = 18
+  rCp = 24
+  rCa = 27
+  rPv = 30
+  rTo = 33
+
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Qx(nq+6) nonnegative   #  qddot
+  Qw(nt) nonnegative     #  slack e
+  #- Gradiant vector   : linear cost term.
+  px(nq+6)
+
+  #-Equality Constraints
+  Jt[i](nq+6), i=1..nt  # J_SoT
+  #-constraint vector
+  b1(nt)               # Xddot_d - dot_JSoT * dot_q
+
+  #- velocity constraints
+  v_max(nq)           # maximum joint velocity
+  dt nonnegative       # controller period (for integration)
+  #- positioin constraints
+  q_max(nq)          # maximum joint position
+  q_min(nq)          # maximum joint position
+
+  # paprameter to harden the constraints
+  hard(nt)
+
+end
+
+variables
+  x(nq+6)  #  acceleration
+  w(nt)    #  slack variables
+
+end
+
+minimize
+  Qx'*square(x - px) + Qw'*square(w)
+subject to
+  # constraint on the acceleration task
+  sum[j=iB+1..iB+nB+nT](Jt[rLH+i][j]*x[j]) + sum[j=iLH+1..iLH+nLH](Jt[rLH+i][j]*x[j]) + (1-hard[rLH+i]) * w[rLH+i] == b1[rLH+i], i=1..6        # left hand
+  sum[j=iB+1..iB+nB+nT](Jt[rRH+i][j]*x[j]) + sum[j=iRH+1..iRH+nRH](Jt[rRH+i][j]*x[j]) + (1-hard[rRH+i]) * w[rRH+i] == b1[rRH+i], i=1..6        # right hand
+  sum[j=iB+1..iB+nB](   Jt[rLL+i][j]*x[j]) + sum[j=iLL+1..iLL+nLL](Jt[rLL+i][j]*x[j]) + (1-hard[rLL+i]) * w[rLL+i] == b1[rLL+i], i=1..6        # left foot
+  sum[j=iB+1..iB+nB](   Jt[rRL+i][j]*x[j]) + sum[j=iRL+1..iRL+nRL](Jt[rRL+i][j]*x[j]) + (1-hard[rRL+i]) * w[rRL+i] == b1[rRL+i], i=1..6        # right foot
+  sum[j=iB+1..iB+nq+6]( Jt[rCp+i][j]*x[j])                                            + (1-hard[rCp+i]) * w[rCp+i] == b1[rCp+i], i=1..3        # center of mass
+  sum[j=iB+1..iB+nq+6]( Jt[rCa+i][j]*x[j])                                            + (1-hard[rCa+i]) * w[rCa+i] == b1[rCa+i], i=1..3        # rate of centroidal angular momentum
+  sum[j=iB+1..iB+nB](   Jt[rPv+i][j]*x[j])                                            + (1-hard[rPv+i]) * w[rPv+i] == b1[rPv+i], i=1..3        # Pelvis
+  sum[j=iB+1..iB+nB+nT](Jt[rTo+i][j]*x[j])                                            + (1-hard[rTo+i]) * w[rTo+i] == b1[rTo+i], i=1..3        # Chest/# Torso
+
+  # Velocity and joint limits
+  #-v_max[i] <=  x[i+nB] <= v_max[i], i=1..nq        # joints velocity limits
+  q_min[i] <=  dt*x[i+nB] <= q_max[i], i=1..nq       # joints position limitis
+end

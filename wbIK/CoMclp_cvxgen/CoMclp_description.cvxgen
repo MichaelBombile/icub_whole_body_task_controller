@@ -1,0 +1,49 @@
+# Produced by CVXGEN, 2020-10-04 06:20:49 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# constraints to clamp the CoM
+#==============================
+
+dimensions
+  # number of joints and task dimension
+  n=6
+  # row postion of the ith Jacobian in the task
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Q(2,2) psd   #  qdot
+  #- Gradiant vector   : linear cost term.
+  P(2)     #
+  #-Inequality Constraints
+  NeJc(n,2)
+  #-constraint vector
+  deXc(n)
+end
+
+variables
+  xc(2)  #  com position
+end
+
+minimize
+  quad(xc, Q) + P'*xc
+subject to
+  # Constraints on CoM
+  NeJc * xc <= deXc
+end

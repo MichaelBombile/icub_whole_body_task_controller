@@ -1,0 +1,97 @@
+# Produced by CVXGEN, 2020-03-25 12:35:58 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+
+# Produced by CVXGEN, 2020-02-23 10:59:11 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2020-02-12 05:08:23 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-11-18 18:31:14 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  # number of joints and task dimension
+  nq = 29
+  nt = 36 #65 #30, 36
+  # number of DoF in each block
+  nB = 6
+  nT = 3
+  nLH = 7
+  nRH = 7
+  nLL = 6
+  nRL = 6
+  nCM = 6
+  # block indices in acceleration vector
+  iB  = 0
+  iT  = 6
+  iLH = 9
+  iRH = 16
+  iLL = 23
+  iRL = 29
+  # row postion of the ith Jacobian in the task
+  rLH = 0
+  rRH = 6
+  rLL = 12
+  rRL = 18
+  rCp = 24
+  rCa = 27
+  rPv = 30
+  rTo = 33
+
+end
+
+parameters
+  #Cost function
+  #- Hessian Matrices   : quadratic penalty.
+  Q(nq+6,nq+6) psd   #  qdot
+  #- Gradiant vector   : linear cost term.
+  P(nq+6)     #
+  #-Inequality Constraints
+  NeJc[i](nq+6), i=1..6  # Normal * J_SoT xy com
+  #-constraint vector
+  deXc(6)               # de + Ne*(Xrf - X0_com)
+  #- joint limits constraints
+  dt nonnegative       # controller period (for integration)
+  #- positioin constraints
+  qmin(nq)          # maximum joint position
+  qmax(nq)          # maximum joint position
+end
+
+variables
+  qdot(nq+6)  #  acceleration
+end
+
+minimize
+  quad(qdot, Q) + P'*qdot
+subject to
+  # Constraints on CoM
+  sum[j=1..nq+6](NeJc[i][j] * dt * qdot[j]) <= deXc[i], i=1..6
+  # joint limit constraints
+  qmin[i] <=  dt * qdot[i+nB] <= qmax[i], i=1..nq       # joints position limitis
+end

@@ -1,0 +1,68 @@
+# Produced by CVXGEN, 2019-04-21 11:08:24 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-02-03 17:20:53 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# computation of contact wrenches
+dimensions
+
+  # block indices in relative and absolute motion vector
+  rrm =0
+  ram =12
+
+end
+
+parameters
+
+  #Cost function
+
+  #- Hessian Matrices   : quadratic penalty.
+  Qam(6)  nonnegative   #  absolute motion
+  Qrm(12) nonnegative   #  relative motion
+  #Qw(12)  nonnegative    #  slack e
+
+  #- Gradiant vector   : linear cost term.
+
+  #- Constraints
+
+  #-Equality Constraints
+  #-constraint matrix
+  Jgm(6,12)     # Jacobian of motion
+  Jgc(12,12)   # Jacobian of constraint
+
+  #-constraint vector
+  bam(6)         # dVa_ref - dJgm*dXh
+  brm(12)        # dVr_ref - dJgc*dXh
+
+  lambda nonnegative
+
+end
+
+variables
+
+  x(12)  #  hands motion (acceleration or velocity) depending on b1 and b2
+end
+
+minimize
+
+  quad(Qam'*(Jgm * x - bam)) + quad(Qrm'*(Jgc * x - brm)) + lambda * norm_1(x)
+
+subject to
+
+  #-Equality Constraints
+  # Dynamics constraints
+
+end

@@ -1,0 +1,177 @@
+# Produced by CVXGEN, 2019-04-27 12:39:17 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-04-22 09:52:36 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2019-04-21 15:31:35 -0400.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# Produced by CVXGEN, 2018-11-14 08:50:38 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+# SEcond Hierarchy
+
+dimensions
+
+ # number of joints and task dimension
+  nq = 29
+  nt = 36
+
+  # number of DoF in each block
+  nB = 6
+  nT = 3
+  nLH = 7
+  nRH = 7
+  nLL = 6
+  nRL = 6
+
+  # block indices in acceleration vector
+  iB=0
+  iT = 6
+  iLH = 9
+  iRH = 16
+  iLL = 23
+  iRL = 29
+
+  # row postion of the ith Jacobian in the task
+  rC = 0
+  rLH = 6
+  rRH = 12
+  rLL = 18
+  rRL = 24
+  rW  = 30
+
+
+end
+
+parameters
+
+  #Cost function
+
+  #- Hessian Matrices   : quadratic penalty.
+  Qx(nq+6) nonnegative   #  qddot
+  Qy(nq) nonnegative    #  tau
+  Qz(12) nonnegative   #  lambda
+  Qw(6) nonnegative   #  slack e
+
+  #- Gradiant vector   : linear cost term.
+  px(nq+6)
+  #py(nq)
+  #pz(12)
+  #pw(nt)
+
+  #- Constraints
+
+  #-Equality Constraints
+  #-constraint matrix
+
+  M[i] (nq+6), i=1..nq+6  # Inertia matrix
+  A12(nq+6, nq)           # -S^T
+  Jt[i](nq+6), i=1..nq+6  # JSoT
+  F[i](6), i=1..2         # Feet contact forces
+  XJbL[i](6), i=1..6      # c_X^-T_b * Jc^T_b Left
+  XJbR[i](6), i=1..6      # c_X^-T_b * Jc^T_b right
+
+  #-constraint vector
+
+  b1(nq+6)             # -h_b + Jf^T_b * F_m
+  b2(6)                # Hdot_d -  c_X^-T_b *Jf^T_b * F_m - Gf
+  b3(nt)               # Xddot_d - dot_JSoT * dot_q
+
+  #-Inequality Constraints
+  #- torque constraints
+  T_max(nq)            # maximum torque
+
+  #- velocity constraints
+  v_max(nq)           # maximum joint velocity
+  dt nonnegative       # controller period (for integration)
+
+  #- positioin constraints
+  q_max(nq)          # maximum joint position
+  q_min(nq)          # maximum joint position
+
+  #- contact constraints
+  CL[i](6), i=1..11             # contact constraint matrix left foot
+  CR[i](6), i=1..11             # contact constraint matrix left foot
+
+  # activation of feet contact
+  aL nonnegative
+  aR nonnegative
+
+end
+
+variables
+
+  x(nq+6)  #  acceleration
+  y(nq)  #  torque
+  z(12)  #  contact forces
+  w(6)  #  slack variables
+
+end
+
+minimize
+
+  #Qx'*square(x-px) + Qy'*square(y) +  Qz'*square(z) +  Qw'*square(w)
+  sum[i=1..nq](Qx[6+i]*square(x[6+i]-px[6+i])) + Qy'*square(y) +  Qz'*square(z)+  Qw'*square(w)
+
+subject to
+
+  #-Equality Constraints
+  # Dynamics constraints
+  sum[j=iB+1..iB+nq+6](M[i][j]*x[j])-sum[j=1..3](aL*Jt[rLL+j][i]*z[j] + aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iB+1..iB+3                                # Linear dof of the base
+  sum[j=iB+1..iB+nq+6](M[i][j]*x[j])-sum[j=1..6](aL*Jt[rLL+j][i]*z[j] + aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iB+4..iB+6                                # angular dof of the base
+  sum[j=iB+1..iB+nB+nT+nLH+nRH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iT+1..iT+nT                                                                      # Torso  joints
+  sum[j=iB+1..iB+nB+nT](M[i][j]*x[j]) + sum[j=iLH+1..iLH+nLH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iLH+1..iLH+nLH                                     # Left arm joints
+  sum[j=iB+1..iB+nB+nT](M[i][j]*x[j]) + sum[j=iRH+1..iRH+nRH](M[i][j]*x[j]) - y[i-nB]  == b1[i], i=iRH+1..iRH+nRH                                     # right arm joints
+  sum[j=iB+1..iB+nB](M[i][j]*x[j]) + sum[j=iLL+1..iLL+nLL](M[i][j]*x[j]) - y[i-nB] -sum[j=1..6](aL*Jt[rLL+j][i]*z[j]) == b1[i], i=iLL+1..iLL+nLL      # Left leg joints
+  sum[j=iB+1..iB+nB](M[i][j]*x[j]) + sum[j=iRL+1..iRL+nRL](M[i][j]*x[j]) - y[i-nB] -sum[j=1..6](aR*Jt[rRL+j][i]*z[6+j]) == b1[i], i=iRL+1..iRL+nRL    # right leg joints
+
+  # constraints of time variation of momemtum
+  sum[j=1..6](aL*XJbL[i][j]*z[j] + aR*XJbR[i][j]*z[6+j]) + w[i] == b2[i], i=1..6
+
+  # constraint on the acceleration task
+  sum[j=iB+1..iB+nq+6](Jt[rC+i][j]*x[j])    == b3[rC+i], i=1..6                                                     # center of mass
+  sum[j=iB+1..iB+nB+nT](Jt[rLH+i][j]*x[j]) + sum[j=iLH+1..iLH+nLH](Jt[rLH+i][j]*x[j]) == b3[rLH+i], i=1..6        # left hand
+  sum[j=iB+1..iB+nB+nT](Jt[rRH+i][j]*x[j]) + sum[j=iRH+1..iRH+nRH](Jt[rRH+i][j]*x[j]) == b3[rRH+i], i=1..6        # right hand
+  sum[j=iB+1..iB+nB](Jt[rLL+i][j]*x[j])    + sum[j=iLL+1..iLL+nLL](Jt[rLL+i][j]*x[j]) == b3[rLL+i], i=1..6        # left foot
+  sum[j=iB+1..iB+nB](Jt[rRL+i][j]*x[j])    + sum[j=iRL+1..iRL+nRL](Jt[rRL+i][j]*x[j]) == b3[rRL+i], i=1..6        # right foot
+
+
+  #-Inequality Constraints
+  # - joints torque, velocity, position limits
+  -T_max <= y <= T_max                                       # torque limits
+  -v_max[i] <= dt * x[i+nB] <= v_max[i], i=1..nq             # joints velocity limits
+  q_min[i] <= (1/2)*dt*dt*x[i+nB] <= q_max[i], i=1..nq       # joints position limitis
+
+  # contcat forces constraints
+  sum[j=1..6](CL[i][j] * z[j]) <= 0, i=1..11
+  sum[j=1..6](CR[i][j] * z[6+j]) <= 0, i=1..11
+
+
+
+end
