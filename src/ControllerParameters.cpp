@@ -29,17 +29,18 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	RobotName 					= robotName;
 	actuatedDofs 				= n_actuatedDofs;
 	writeCommands 				= false;
-	runtimeCommands 			= true;
+	runtimeCommands 			= false;
 	AllPositionArmsTorqueMode 	= false;
 	OrientChest   				= true;
 	apply_wrench  				= true;
 	Task_Hierarchy_Active 		= false;
 	inputPortsActive 			= false;
 	no_tracking_object 			= false;
-	AccelCommand 				= true;
+	AccelCommand 				= false;
 	init_posture_hands 			= false;
 	PositionCommands			= PositionMode_; //false;
 	CmdsFromWBID				= false;
+	with_FFwdCtrl 				= true;
 
 	epsil_reach 				= 0.06;
 
@@ -136,8 +137,8 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	// /////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Surface parameters
-	Hands_contact_param(0) = 0.4;					// mu hands    	:	friction coefficient
-	Hands_contact_param(1) = 0.4;					// gamma hands 	: 	moment friction coeff
+	Hands_contact_param(0) = 0.4;	// 0.4				// mu hands    	:	friction coefficient
+	Hands_contact_param(1) = 0.6;	// 0.4				// gamma hands 	: 	moment friction coeff
 	Hands_contact_param(2) = 0.025;					// deltaX_hands : 	length of the contact surface
 	Hands_contact_param(3) = 0.025;					// deltaY_hands : 	width of the contact surface
 	// feet contact surface parameters
@@ -218,12 +219,27 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 
     // CoM compliant
     vM_CoM_c <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
-	vD_CoM_c <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
-	vK_CoM_c <<  10.0,    10.0,  5.0,   20.0, 20.0, 20.0; 
+	vD_CoM_c <<   10.0,   10.0,  6.5,   15.0, 5.0, 15.0;  
+	vK_CoM_c <<  20.0,    10.0,  5.0,   20.0, 20.0, 20.0; 
 	// stiff
 	vM_CoM_s <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
-	vD_CoM_s <<   15.0,   15.0,  10.0,   15.0, 15.0, 15.0;  // <<   65.0,   65.0,   65.0, 10.0, 10.0, 10.0; 
+	vD_CoM_s <<   15.0,   15.0,  10.0,   15.0, 5.0, 15.0;  // <<   65.0,   65.0,   65.0, 10.0, 10.0, 10.0; 
 	vK_CoM_s <<  20.0,    20.0,  10.0,   20.0, 20.0, 20.0;  // <<  100.0,  100.0,  100.0, 20.0, 20.0, 20.0; 
+	// vM_CoM_s <<    1.0,    1.0,    1.0,   1.0,    1.0,   1.0;
+	// vD_CoM_s <<   20.0,   20.0,   20.0,  20.0,   20.0,  20.0;
+	// vK_CoM_s <<  100.0,  100.0,  100.0, 100.0,  100.0, 100.0;
+
+	// CoM compliant
+    vM_Pelvis_c <<   1.0,   1.0,   1.0,  1.0,    1.0,   1.0; 
+	vD_Pelvis_c <<   12.0,  12.0,  12.0,  12.0,  12.0,  12.0;  
+	vK_Pelvis_c <<   30.0,  30.0,  30.0,  30.0,  30.0,  30.0;
+	// stiff
+	vM_Pelvis_s <<   1.0,   1.0,   1.0,  1.0,    1.0,   1.0; 
+	vD_Pelvis_s <<   12.0,  12.0,  12.0,  20.0,   20.0,   20.0;  
+	vK_Pelvis_s <<   30.0,  30.0,  30.0,  100.0,  100.0,  100.0;
+	// vM_Pelvis_s <<    1.0,    1.0,    1.0,   1.0,    1.0,   1.0;
+	// vD_Pelvis_s <<   20.0,   20.0,   20.0,  20.0,   20.0,  20.0;
+	// vK_Pelvis_s <<  100.0,  100.0,  100.0, 100.0,  100.0, 100.0;
 
 	//
 	Weight_acceleration = Eigen::VectorXd::Ones(n_actuatedDofs+6);
@@ -239,8 +255,8 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	posture_weight_retract(2) *= 2.;
 
 	posture_weight_grasp = posture_weight;
-	posture_weight_grasp(4)  *= 20.0;
-	posture_weight_grasp(11) *= 20.0;
+	posture_weight_grasp(4)  *= 30.0;  // 20.0;
+	posture_weight_grasp(11) *= 30.0;  // 20.0;
 
 
 
@@ -249,10 +265,10 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	task_weight[2] <<     5.0,    5.0,   5.0,   2.50,   2.50,   2.50;  	// weight_rhand; 
 	task_weight[3] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_lfoot; 
 	task_weight[4] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_rfoot;
-	task_weight[5] <<    0.00,   0.00,  0.00,  10.e-0, 5.e-0, 10.e-0;  	// weight_pelvis;  	2.e-1, 1.e-2, 5.e-2
+	task_weight[5] <<    0.00,   0.00,  0.00,  10.e-0, 5.e-0, 10.e-0;  	// weight_pelvis;  	10.e-0, 5.e-0, 10.e-0  2.e-1, 1.e-2, 5.e-2  
 	task_weight[6] <<    0.00,   0.00,  0.00,  2.e-0,  2.e-0,  2.e-0;  	// weight_chest;  	1.e-5,  1.e-5,  5.e-5
 
-	task_weight[0] *=15.;  // 8.
+	task_weight[0] *=20.;  // 15. 8.
 	task_weight[1] *=15.0; // 0.15
 	task_weight[2] *=15.0; // 0.15
 	task_weight[3] *=50.;
@@ -296,6 +312,7 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	w_cop  = 0.80;
 	wu_cop = w_cop;
 	wc_cop = 1. - w_cop;
+	rest_height_com = 0.49;
 
     // Velocity and torque saturation limits
     // ======================================
@@ -497,18 +514,18 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 		wobj = 0.5*object_dimensions.width;
 		lobj = 0.5*object_dimensions.length;
 		// // left
-		object_Pose_Gpoints[0].head(3) = Vector3d(-lobj+0.05, wobj+0.00, -0.00)   + 1.0*ofst*Vector3d(-0.00,  0.005, -0.00);
+		object_Pose_Gpoints[0].head(3) = Vector3d(-lobj+0.045, wobj+0.00, -0.00)   + 1.0*ofst*Vector3d(-0.00,  0.005, 0.01);
 		object_Pose_Gpoints[0].tail(4) = des_orientation_hands;
 		// // right
-		object_Pose_Gpoints[1].head(3) << Vector3d(-lobj+0.05, -wobj-0.00, -0.00) + 1.0*ofst*Vector3d(-0.00, -0.005, -0.00);
+		object_Pose_Gpoints[1].head(3) << Vector3d(-lobj+0.045, -wobj-0.00, -0.00) + 1.0*ofst*Vector3d(-0.00, -0.005, 0.01);
 		object_Pose_Gpoints[1].tail(4) = des_orientation_hands;
 
 		if(RobotIndex == 2)
 		{
-			object_Pose_Gpoints[0].head(3) = Vector3d(lobj-0.045, -wobj-0.00, -0.00)   + 1.0*ofst*Vector3d(-0.00, -0.005, -0.00);
+			object_Pose_Gpoints[0].head(3) = Vector3d(lobj-0.045, -wobj-0.00, -0.00)   + 1.0*ofst*Vector3d(0.01, -0.005, 0.01);
 			object_Pose_Gpoints[0].tail(4) = des_orientation_hands; 	//-1.0, 0.0, 0.0, M_PI/2.;
 			// // right
-			object_Pose_Gpoints[1].head(3) << Vector3d(lobj-0.045, wobj+0.00, -0.00) + 1.0*ofst*Vector3d(-0.00,    0.005, -0.00);
+			object_Pose_Gpoints[1].head(3) << Vector3d(lobj-0.045, wobj+0.00, -0.00) + 1.0*ofst*Vector3d(0.01,    0.005, 0.01);
 			object_Pose_Gpoints[1].tail(4) = des_orientation_hands; 	//-1.0, 0.0, 0.0, M_PI/2.;
 		}
 		// // hands offset for simulator
@@ -604,7 +621,7 @@ bool ControllerParameters::Initialize(std::string robotName, std::string moduleN
 	Weight_relative_motion.head<6>() << 10.0, 10.0, 10.0, 10.0, 10.0, 10.0;
 	Weight_relative_motion.tail<6>() << 10.0, 10.0, 10.0, 10.0, 10.0, 10.0;
 	//
-	tol_dist2contact  	= 0.0425;
+	tol_dist2contact  	= 0.04; //0.0425;
 	min_normalForce 	= -20.0;
 	max_normalForce 	=  20.0;
 	gain_tau_hands  	=  12.0;

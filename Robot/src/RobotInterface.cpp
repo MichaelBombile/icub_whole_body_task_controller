@@ -1169,10 +1169,8 @@ void RobotInterface::OpenRobotSensors(std::string robotName, double SamplingTime
     this->r_arm_FT_data  = r_arm_FT_inputPort.read();   
     this->l_foot_FT_data = l_foot_FT_inputPort.read();
     this->r_foot_FT_data = r_foot_FT_inputPort.read();  
-
     // this->l_hand_FT_data  = l_hand_FT_inputPort.read();
     // this->r_hand_FT_data  = r_hand_FT_inputPort.read();  
-
     //
     // Resizing of the measurement vectors    
     // CoM_measurements.resize(CoM_values->size()); 
@@ -1185,9 +1183,12 @@ void RobotInterface::OpenRobotSensors(std::string robotName, double SamplingTime
     this->r_arm_FT_vector.resize(this->r_arm_FT_data->size());
     this->l_foot_FT_vector.resize(this->l_foot_FT_data->size());
     this->r_foot_FT_vector.resize(this->r_foot_FT_data->size());
-
     // this->l_hand_FT_vector.resize(this->l_hand_FT_data->size());
     // this->r_hand_FT_vector.resize(this->r_hand_FT_data->size());
+    for (int i=0; i<l_arm_FT_data->size();  i++) {  l_arm_FT_vector(i)  = l_arm_FT_data->get(i).asDouble();   }
+    for (int i=0; i<r_arm_FT_data->size();  i++) {  r_arm_FT_vector(i)  = r_arm_FT_data->get(i).asDouble();   }
+    for (int i=0; i<l_foot_FT_data->size(); i++) {  l_foot_FT_vector(i) = l_foot_FT_data->get(i).asDouble();  }
+    for (int i=0; i<r_foot_FT_data->size(); i++) {  r_foot_FT_vector(i) = r_foot_FT_data->get(i).asDouble();  }
 
     //
     sensor_T_Gfoot = Eigen::MatrixXd::Identity(4,4);
@@ -1406,6 +1407,8 @@ Vector6d RobotInterface::getFilteredLeftArmForceTorqueValues()
     // Filtering
     // this->l_arm_FT_vector = this->Filter_FT_LeftArm.getEulerIntegral(this->l_arm_FT_vector);
 
+    std::cout << " XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX         L ARM FT MEASUREMENT : \t" << l_arm_FT_vector.transpose() << endl;
+
     return this->l_arm_FT_vector;
 }
 
@@ -1416,6 +1419,8 @@ Vector6d RobotInterface::getFilteredRightArmForceTorqueValues()
     for (int i=0; i<this->r_arm_FT_data->size(); i++) {
         r_arm_FT_vector(i)= this->r_arm_FT_data->get(i).asDouble();
     }
+
+    std::cout << " XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX         R ARM FT MEASUREMENT : \t" << r_arm_FT_vector.transpose() << endl;
     // Filtering
     // this->r_arm_FT_vector = this->Filter_FT_RightArm.getEulerIntegral(this->r_arm_FT_vector);
 
@@ -1600,8 +1605,8 @@ bool RobotInterface::applyExternalWrench(yarp::os::RpcClient &inPort, std::strin
 bool RobotInterface::applyExternalWrench_world(yarp::os::RpcClient &inPort, std::string link, Vector6d Wrench, double duration, Matrix3d w_R_pelvis)
 {
     //
-    Wrench.head(3) = w_R_pelvis * Wrench.head(3);
-    Wrench.tail(3) = w_R_pelvis * Wrench.tail(3);
+    // Wrench.head(3) = w_R_pelvis * Wrench.head(3);
+    // Wrench.tail(3) = w_R_pelvis * Wrench.tail(3);
     //
     this->applyExternalWrench(inPort, link, Wrench, duration);
     //

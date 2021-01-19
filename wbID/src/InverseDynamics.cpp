@@ -102,66 +102,7 @@ bool InverseDynamics::threadInit()
 	J_T_Wx_J.setZero();
 	J_T_Wx_Xdot.setZero();
 	//
-	// Weight_acceleration = Eigen::VectorXd::Ones(n_actuatedDofs+6);
-	// Weight_acceleration.segment( 0, 6) << 50., 50., 10., 20., 20., 20.; 				// floating base
-	// // Weight_acceleration.segment( 6, 3) << 2.5, 2.5, 2.5; 							// torso
-	// // Weight_acceleration.segment( 9, 7) << 1., 1., 1., 1., 1., 1., 1.; 				// left arm
-	// // Weight_acceleration.segment(16, 7) << 1., 1., 1., 1., 1., 1., 1.; 				// right arm
-	// // Weight_acceleration.segment(23, 6) << 1., 1., 1., 1., 1., 1.; 					// left leg 	leg hip yaw *= 2.5;
-	// // Weight_acceleration.segment(29, 6) << 1., 1., 1., 1., 1., 1.; 					// right leg 	leg hip yaw *= 2.5;
-	// Weight_acceleration *= 1e-4;
-
-	// posture_weight = Eigen::VectorXd::Ones(n_actuatedDofs);
-	// // posture_weight.segment( 0, 3) << 3.5, 2.5, 1.; 					// torso
-	// posture_weight *= 5.5;
-
-	// task_weight[0] <<  15.e-0, 15.e-0, 5.e-1, 10.e-0, 10.e-0, 10.e-0;  	// weight_CoMp; 
-	// task_weight[1] <<     5.0,    5.0,   5.0,   2.50,   2.50,   2.50;  	// weight_lhand; 
-	// task_weight[2] <<     5.0,    5.0,   5.0,   2.50,   2.50,   2.50;  	// weight_rhand; 
-	// task_weight[3] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_lfoot; 
-	// task_weight[4] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_rfoot;
-	// task_weight[5] <<    0.00,   0.00,  0.00,  10.e-0, 5.e-0, 10.e-0;  	// weight_pelvis;  	2.e-1, 1.e-2, 5.e-2
-	// task_weight[6] <<    0.00,   0.00,  0.00,  1.e-5,  1.e-5,  5.e-5;  	// weight_chest; 
-
-	// task_weight[0] *=20.;
-	// task_weight[1] *=10.0;
-	// task_weight[2] *=10.0;
-	// task_weight[3] *=50.;
-	// task_weight[4] *=50.;
-	// task_weight[5] *=20.0;
-	// task_weight[6] *=20.0;
-
-
-	// Weight_acceleration = Eigen::VectorXd::Ones(n_actuatedDofs+6);
-	// Weight_acceleration.segment( 0, 6) << 50., 50., 10., 20., 20., 20.; 				// floating base
-	// // Weight_acceleration.segment( 6, 3) << 2.5, 2.5, 2.5; 							// torso
-	// // Weight_acceleration.segment( 9, 7) << 1., 1., 1., 1., 1., 1., 1.; 				// left arm
-	// // Weight_acceleration.segment(16, 7) << 1., 1., 1., 1., 1., 1., 1.; 				// right arm
-	// // Weight_acceleration.segment(23, 6) << 1., 1., 1., 1., 1., 1.; 					// left leg 	leg hip yaw *= 2.5;
-	// // Weight_acceleration.segment(29, 6) << 1., 1., 1., 1., 1., 1.; 					// right leg 	leg hip yaw *= 2.5;
-	// Weight_acceleration *= 1e-4;
-
-	// posture_weight = Eigen::VectorXd::Ones(n_actuatedDofs);
-	// // posture_weight.segment( 0, 3) << 3.5, 2.5, 1.; 					// torso
-	// posture_weight *= 10.5;
-	// posture_weight(2) *= 5.0;
-
-	// task_weight[0] <<  15.e-0, 15.e-0, 5.e-1, 10.e-0, 10.e-0, 10.e-0;  	// weight_CoMp; 
-	// task_weight[1] <<     5.0,    5.0,   5.0,   2.50,   2.50,   2.50;  	// weight_lhand; 
-	// task_weight[2] <<     5.0,    5.0,   5.0,   2.50,   2.50,   2.50;  	// weight_rhand; 
-	// task_weight[3] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_lfoot; 
-	// task_weight[4] <<   100.0,  100.0, 100.0,  200.0,  200.0,  200.0; 	// weight_rfoot;
-	// task_weight[5] <<    0.00,   0.00,  0.00,  10.e-0, 5.e-0, 10.e-0;  	// weight_pelvis;  	2.e-1, 1.e-2, 5.e-2
-	// task_weight[6] <<    0.00,   0.00,  0.00,  2.e-0,  2.e-0,  2.e-0;  	// weight_chest;  	1.e-5,  1.e-5,  5.e-5
-
-	// task_weight[0] *=8.;
-	// task_weight[1] *=10.0;
-	// task_weight[2] *=10.0;
-	// task_weight[3] *=50.;
-	// task_weight[4] *=50.;
-	// task_weight[5] *=20.0;
-	// task_weight[6] *=30.0;
-
+	
 	Weight_acceleration	= ctrl_param.Weight_acceleration;
 	posture_weight      = ctrl_param.posture_weight;
 	memcpy(task_weight, &ctrl_param.task_weight[0], 7 * sizeof *ctrl_param.task_weight); 
@@ -217,8 +158,8 @@ bool InverseDynamics::threadInit()
 	// -------------------------------------------
 	// robot_model_.getJointsLimits();
 	VectorXd minJointLimits = this->robot_model.m_min_jtsLimits;
-	minJointLimits(4)  = 12.*M_PI/180.;
-	minJointLimits(11) = 12.*M_PI/180.;
+	minJointLimits(4)  = 14.*M_PI/180.;
+	minJointLimits(11) = 14.*M_PI/180.;
 	VectorXd maxJointLimits = this->robot_model.m_max_jtsLimits;
 	maxJointLimits(n_actuatedDofs-9) = -2.0*M_PI/180.;
 	maxJointLimits(n_actuatedDofs-3) = -2.0*M_PI/180.;
@@ -443,144 +384,6 @@ void InverseDynamics::get_optimal_solution()
 	for(int i=0; i<30; i++) { optimal_slack(i) = vars.w[i]; }
 
 }
-
-// void InverseDynamics::load_default_data()
-// {
-// 	//
-// 	double ref_period = 4.0;
-// 	double omega = 2.0*M_PI/ref_period;
-
-// 	params.dt[0] = run_period_sec;
-// 	params.aL[0] = 1.0;
-// 	params.aR[0] = 1.0; 
-// 	params.dwd[0] = desired_weight_prortion_rfoot;
-// 	params.aw[0]  = 1.0;
-
-// 	// weight on acceleration
-// 	for(int i=0; i<n_actuatedDofs+6; i++) { params.Qx[i] = ctrl_param.Weight_accel(i); }
-// 	// weight on torque
-// 	for(int i=0; i<n_actuatedDofs; i++) { params.Qy[i] = ctrl_param.Weight_tau(i); }
-// 	// weight on contact forces
-// 	for(int i=0; i<12; i++) { params.Qz[i] = ctrl_param.Weight_F_contact(i); }
-// 	// weight of the stack of task
-// 	for(int i=0; i<30; i++) { params.Qw[i] = ctrl_param.Weight_SoT(i); }
-
-// 	for(int i=0; i<6; i++) { params.Qw[30+i] = 10*ctrl_param.Weight_SoT(i); }
-
-// 	for(int i=0; i<n_actuatedDofs; i++) { params.Qw[36+i] = Weight_posture(6+i); }
-
-// 	for(int i=0; i<5; i++) { params.Qw[36+n_actuatedDofs+i] = ctrl_param.Weight_CoP(i); } //weight_cop_lfoot weight_cop_rfoot weight_distribution_rfoot
-
-// 	for(int i=0; i<6; i++) { params.Qw[36+n_actuatedDofs+5+i]   = 0.1*ctrl_param.Weight_SoT(18+i); 	//weight_rfoot
-// 							 params.Qw[36+n_actuatedDofs+5+6+i] = 0.1*ctrl_param.Weight_SoT(24+i);} //weight_rfoot
-	
-
-
-// 	int N_DOF = n_actuatedDofs+6;
-
-// 	// Mass matrix
-// 	for(int i=0; i<n_actuatedDofs+6; i++)
-// 	{
-		
-// 		// for(int i=0;i<AIR_N_U;i++)
-// 		memcpy(params.M[i+1], &ioSM.massMatrix(0,i),     sizeof(double)*(N_DOF));
-// 		//
-// 		params.b1[i] = bias_fcontact_torque(i);  // -h + Jf^T * F_m
-// 	}
-
-// // Task Jacobian
-// 	for(int i=0; i<n_actuatedDofs+6; i++)
-// 	{
-// 		// centroidal 
-// 		params.Jt_1[i] = Jacobian_SoT(0,i);		params.Jt_2[i] = Jacobian_SoT(1,i);		params.Jt_3[i] = Jacobian_SoT(2,i);	
-// 		params.Jt_4[i] = Jacobian_SoT(3,i);		params.Jt_5[i] = Jacobian_SoT(4,i);		params.Jt_6[i] = Jacobian_SoT(5,i);
-// 		// left hand 
-// 		params.Jt_7[i] = Jacobian_SoT(6,i);		params.Jt_8[i] = Jacobian_SoT(7,i);		params.Jt_9[i] = Jacobian_SoT(8,i);	
-// 		params.Jt_10[i] = Jacobian_SoT(9,i);	params.Jt_11[i] = Jacobian_SoT(10,i);	params.Jt_12[i] = Jacobian_SoT(11,i);
-// 		// right hand 
-// 		params.Jt_13[i] = Jacobian_SoT(12,i);	params.Jt_14[i] = Jacobian_SoT(13,i);	params.Jt_15[i] = Jacobian_SoT(14,i);	
-// 		params.Jt_16[i] = Jacobian_SoT(15,i);	params.Jt_17[i] = Jacobian_SoT(16,i);	params.Jt_18[i] = Jacobian_SoT(17,i);
-// 		// left foot
-// 		params.Jt_19[i] = Jacobian_SoT(18,i);	params.Jt_20[i] = Jacobian_SoT(19,i);	params.Jt_21[i] = Jacobian_SoT(20,i);	
-// 		params.Jt_22[i] = Jacobian_SoT(21,i);	params.Jt_23[i] = Jacobian_SoT(22,i);	params.Jt_24[i] = Jacobian_SoT(23,i);
-// 		// right foot 
-// 		params.Jt_25[i] = Jacobian_SoT(24,i);	params.Jt_26[i] = Jacobian_SoT(25,i);	params.Jt_27[i] = Jacobian_SoT(26,i);	
-// 		params.Jt_28[i] = Jacobian_SoT(27,i);	params.Jt_29[i] = Jacobian_SoT(28,i);	params.Jt_30[i] = Jacobian_SoT(29,i);
-// 	}
-
-// 	// J_T_Wq_J
-// // J_T_Wq_ddot
-
-// 	// desired centroidal momentum variation :Hdot_d -  c_X^-T_b *Jf^T_b * F_m - Gf
-// 	for(int i=0; i<6; i++)
-// 	{
-// 		// left foot
-// 		params.XJbL_1[i] = ioSM.Centroidal_Wrench_Map_lfoot(0,i);	params.XJbL_2[i] = ioSM.Centroidal_Wrench_Map_lfoot(1,i); 	params.XJbL_3[i] = ioSM.Centroidal_Wrench_Map_lfoot(2,i);
-// 		params.XJbL_4[i] = ioSM.Centroidal_Wrench_Map_lfoot(3,i);	params.XJbL_5[i] = ioSM.Centroidal_Wrench_Map_lfoot(4,i); 	params.XJbL_6[i] = ioSM.Centroidal_Wrench_Map_lfoot(5,i);
-// 		// right foot
-// 		params.XJbR_1[i] = ioSM.Centroidal_Wrench_Map_rfoot(0,i);	params.XJbR_2[i] = ioSM.Centroidal_Wrench_Map_rfoot(1,i); 	params.XJbR_3[i] = ioSM.Centroidal_Wrench_Map_rfoot(2,i);
-// 		params.XJbR_4[i] = ioSM.Centroidal_Wrench_Map_rfoot(3,i);	params.XJbR_5[i] = ioSM.Centroidal_Wrench_Map_rfoot(4,i); 	params.XJbR_6[i] = ioSM.Centroidal_Wrench_Map_rfoot(5,i);
-// 		// centroidal wrench
-// 		params.b2[i] = desired_centroidal_wrench(i);  // -h_b + Jf^T_b * F_m
-// 	}
-	
-// 	// -h + Jf^T * F_m 
-// 	for(int i=0; i<30; i++) { params.b3[i] = desired_StackOfTasks(i) - dotJacobianDq_SoT(i);  }
-// 	//
-// 	// for(int i=0; i<6; i++) { params.b3[30+i] = 0.0;  }
-// 	for(int i=0; i<6; i++) { 
-// 		params.b3[30+i] = 0.0*desired_posture_acceleration(i);  
-// 	}
-
-// 	//
-// 	for(int i=0; i<n_actuatedDofs; i++) { params.b3[36+i] = desired_posture_acceleration(6+i);  }
-
-// 	// Velocity constraints on the feet
-// 	for(int i=0; i<6; i++)
-// 	{
-// 		params.b4[i]    = 0.0*ioSM.wbTS.lfoot.Velo(i); // 0.0;		//left foot
-// 		params.b4[i+6]  = 0.0*ioSM.wbTS.rfoot.Velo(i); // 0.0;		// right foot			
-// 	}
-
-// 	// joints limits
-// 	for(int i=0; i<n_actuatedDofs; i++) 
-// 	{
-// 		// torque
-// 		params.T_max[i]	=  WbConstraints.torqueConstraint_vector(i);
-// 		// velocity
-// 		params.v_max[i] =  WbConstraints.VelocityLimitsVector(i);
-// 		// position
-// 		params.q_max[i] =  WbConstraints.JointLimitsVector(i);
-// 		params.q_min[i] = -WbConstraints.JointLimitsVector(n_actuatedDofs+i);
-// 	}
-
-// 	// Inequality constraints on the feet contact
-// 	for(int i=0; i<6; i++)
-// 	{
-// 		// left foot
-// 		params.CL_1[i]  = WbConstraints.IneqConstraintMatrix_lf(0,i);		params.CL_2[i]  = WbConstraints.IneqConstraintMatrix_lf(1,i);		
-// 		params.CL_3[i]  = WbConstraints.IneqConstraintMatrix_lf(2,i);		params.CL_4[i]  = WbConstraints.IneqConstraintMatrix_lf(3,i);			
-// 		params.CL_5[i]  = WbConstraints.IneqConstraintMatrix_lf(4,i);		params.CL_6[i]  = WbConstraints.IneqConstraintMatrix_lf(5,i);			
-// 		params.CL_7[i]  = WbConstraints.IneqConstraintMatrix_lf(6,i);		params.CL_8[i]  = WbConstraints.IneqConstraintMatrix_lf(7,i);			
-// 		params.CL_9[i]  = WbConstraints.IneqConstraintMatrix_lf(8,i);		params.CL_10[i] = WbConstraints.IneqConstraintMatrix_lf(9,i);		
-// 		params.CL_11[i] = WbConstraints.IneqConstraintMatrix_lf(10,i);		
-// 		// right foot
-// 		params.CR_1[i]  = WbConstraints.IneqConstraintMatrix_rf(0,i);		params.CR_2[i]  = WbConstraints.IneqConstraintMatrix_rf(1,i);				
-// 		params.CR_3[i]  = WbConstraints.IneqConstraintMatrix_rf(2,i);		params.CR_4[i]  = WbConstraints.IneqConstraintMatrix_rf(3,i);		
-// 		params.CR_5[i]  = WbConstraints.IneqConstraintMatrix_rf(4,i);		params.CR_6[i]  = WbConstraints.IneqConstraintMatrix_rf(5,i);		
-// 		params.CR_7[i]  = WbConstraints.IneqConstraintMatrix_rf(6,i);		params.CR_8[i]  = WbConstraints.IneqConstraintMatrix_rf(7,i);		
-// 		params.CR_9[i]  = WbConstraints.IneqConstraintMatrix_rf(8,i);		params.CR_10[i] = WbConstraints.IneqConstraintMatrix_rf(9,i);		
-// 		params.CR_11[i] = WbConstraints.IneqConstraintMatrix_rf(10,i);
-// 	}
-// 	//
-// 	// Inequality constraints on the feet contact
-// 	for(int i=0; i<6; i++)
-// 	{
-// 		params.copMxl_1[i]  = CoP_constraint_matrix_lfoot(0,i);		params.copMxl_2[i]  = CoP_constraint_matrix_lfoot(1,i);		//left foot
-// 		params.copMxr_1[i]  = CoP_constraint_matrix_rfoot(0,i);		params.copMxr_2[i]  = CoP_constraint_matrix_rfoot(1,i);		// right foot			
-// 	}
-// }
-
 
 void InverseDynamics::load_default_data()
 {

@@ -1227,6 +1227,42 @@ bool BimanualFreeMotionController::getBimanualConstrainedMotion(Matrix4d    cp_d
     // std::cout << " lh_H_rh      \n" << lh_H_rh << std::endl;
     // std::cout << " W_H_ap       \n" << W_H_ap << std::endl;
     // std::cout << " lp_H_rp      \n" << lp_H_rp << std::endl;
+    // /////////////////////////////////////////////////////////////////////////////////////
+    // =====================================
+    // Relative velocity of the hands
+    // =====================================
+    // ///////////////////////////////////////////////////////////////////////////////////// 
+    // Coupling the orientation with the position error
+    Matrix3d des_rel_rot = lp_H_rp.block<3,3>(0,0);
+    Matrix4d lh_H_rh_t = lh_H_rh;
+    lh_H_rh_t.block<3,3>(0,0) = des_rel_rot; //desired
+    // relative transformation
+    Matrix4d d_H_c = lh_H_rh_t.inverse() * lh_H_rh;  // expressed in the left hand frame
+    
+    // orientation error
+    error_rel.tail(3) = Transforms.get_PoseError_cur2des(d_H_c).tail(3);
+    // 3D Orientation Jacobian 
+    Matrix3d L_Mu_Theta_rel = Transforms.get_L_Mu_Theta_Matrix(d_H_c.block<3,3>(0,0)) * w_H_hand[1].block<3,3>(0,0).transpose(); // wrt. the world
+
+    // ///////////////////////////////////////////////////////////////////////////////////////
+    Vector3d des_rel_pos = lp_H_rp.block<3,1>(0,3); // TBC 
+    error_rel.head(3) = lh_H_rh.block<3,1>(0,3) - des_rel_pos;
+
+    // computing the velocity
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+    w_velocity_rel.head(3) = -2.5*ctrl_param.bimanip_gains.relative.head(3).asDiagonal()*error_rel.head(3);
+    w_velocity_rel.tail(3) = -2.5*L_Mu_Theta_rel.inverse() * ctrl_param.bimanip_gains.relative.tail(3).asDiagonal()*error_rel.tail(3);
+
+    // apply saturation to the computed value
+    w_velocity_rel = Transforms.SaturationTwist(ctrl_param.max_reaching_velocity(0), ctrl_param.max_reaching_velocity(3), w_velocity_rel);
+    // ///////////////////////////////////////////////////////////////////////////////////////
+
+    double coupling_rel, coupling_abs; 
+	double psd_time_cpl_rel, psd_time_cpl_abs;
+	double gamma_abs = 0.0;
+
+	psd_time_cpl_rel = 1.0/(50.*error_rel.head<3>().norm()+1e-10);
+	gamma_abs        = 1.0 - exp(-pow(psd_time_cpl_rel, 2.5)/0.05); //3.0/0.1
     
     // /////////////////////////////////////////////////////////////////////////////////////
     // =====================================
@@ -1234,15 +1270,18 @@ bool BimanualFreeMotionController::getBimanualConstrainedMotion(Matrix4d    cp_d
     // =====================================
     // /////////////////////////////////////////////////////////////////////////////////////
     // position error accounting for the reachability of the target
+    // Vector3d des_abs_pos = gamma_abs *W_H_ap.block<3,1>(0,3) + (1.-gamma_abs)*W_H_ah.block<3,1>(0,3);
     Vector3d des_abs_pos = W_H_ap.block<3,1>(0,3);
     error_abs.head(3)    = W_H_ah.block<3,1>(0,3) - des_abs_pos;
     //
     // Coupling the orientation with the position error
+    // Matrix3d des_abs_rot = gamma_abs *W_H_ap.block<3,3>(0,0) + (1.-gamma_abs)*W_H_ah.block<3,3>(0,0);
     Matrix3d des_abs_rot = W_H_ap.block<3,3>(0,0);
     Matrix4d W_H_ah_t = W_H_ah;
     W_H_ah_t.block<3,3>(0,0) = des_abs_rot; //Transforms.getCombinedRotationMatrix(coupling_abs, W_H_ah.block<3,3>(0,0), des_abs_rot); //desired
+    // W_H_ah_t.block<3,3>(0,0) = Transforms.getCombinedRotationMatrix(coupling_abs, W_H_ah.block<3,3>(0,0), des_abs_rot); //desired
     // relative transformation
-    Matrix4d d_H_c = W_H_ah_t.inverse() * W_H_ah;
+    d_H_c = W_H_ah_t.inverse() * W_H_ah;
     // orientation error
     error_abs.tail(3) = Transforms.get_PoseError_cur2des(d_H_c).tail(3);
     // 3D Orientation Jacobian 
@@ -1265,34 +1304,8 @@ bool BimanualFreeMotionController::getBimanualConstrainedMotion(Matrix4d    cp_d
     w_velocity_abs       = Filter_absolute.getEulerIntegral(w_velocity_abs);
     w_acceleration_abs   = Filter_absolute.pole * (w_velocity_abs_0 - w_velocity_abs);
 
-    // /////////////////////////////////////////////////////////////////////////////////////
-    // =====================================
-    // Relative velocity of the hands
-    // =====================================
-    // ///////////////////////////////////////////////////////////////////////////////////// 
-    // Coupling the orientation with the position error
-    Matrix3d des_rel_rot = lp_H_rp.block<3,3>(0,0);
-    Matrix4d lh_H_rh_t = lh_H_rh;
-    lh_H_rh_t.block<3,3>(0,0) = des_rel_rot; //desired
-    // relative transformation
-    d_H_c = lh_H_rh_t.inverse() * lh_H_rh;  // expressed in the left hand frame
     
-    // orientation error
-    error_rel.tail(3) = Transforms.get_PoseError_cur2des(d_H_c).tail(3);
-    // 3D Orientation Jacobian 
-    Matrix3d L_Mu_Theta_rel = Transforms.get_L_Mu_Theta_Matrix(d_H_c.block<3,3>(0,0)) * w_H_hand[1].block<3,3>(0,0).transpose(); // wrt. the world
-
-    // ///////////////////////////////////////////////////////////////////////////////////////
-    Vector3d des_rel_pos = lp_H_rp.block<3,1>(0,3); // TBC 
-    error_rel.head(3) = lh_H_rh.block<3,1>(0,3) - des_rel_pos;
-    // ///////////////////////////////////////////////////////////////////////////////////////
-    // computing the velocity
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    w_velocity_rel.head(3) = -1.*ctrl_param.bimanip_gains.relative.head(3).asDiagonal()*error_rel.head(3);
-    w_velocity_rel.tail(3) = -L_Mu_Theta_rel.inverse() * ctrl_param.bimanip_gains.relative.tail(3).asDiagonal()*error_rel.tail(3);
-
-    // apply saturation to the computed value
-    w_velocity_rel = Transforms.SaturationTwist(ctrl_param.max_reaching_velocity(0), ctrl_param.max_reaching_velocity(3), w_velocity_rel);
+    
     
     // computation of the acceleration through filtered derivative
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

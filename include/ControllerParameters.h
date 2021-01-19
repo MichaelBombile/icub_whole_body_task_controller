@@ -63,6 +63,7 @@ class ControllerParameters // : public yarp::os::RateThread
 		bool init_posture_hands;  			// send the hands at a desired initial posture
 		bool PositionCommands;
 		bool CmdsFromWBID;
+		bool with_FFwdCtrl;
 
     	//
 		torqueControlledJoints   main_joints_list;				// struct of array of main joints
@@ -207,7 +208,7 @@ class ControllerParameters // : public yarp::os::RateThread
 		double wu_cop;
 		double wc_cop;
 		double w_cop;  // [0,1]
-
+		double rest_height_com;
 
 		Eigen::Vector2d desired_CoP_lfoot;
         Eigen::Vector2d desired_CoP_rfoot;
@@ -225,6 +226,12 @@ class ControllerParameters // : public yarp::os::RateThread
 		Vector6d vD_CoM_s;
 		Vector6d vK_CoM_s;
 
+		Vector6d vM_Pelvis_c;
+		Vector6d vD_Pelvis_c;
+		Vector6d vK_Pelvis_c;
+		Vector6d vM_Pelvis_s;
+		Vector6d vD_Pelvis_s;
+		Vector6d vK_Pelvis_s;
 		//
 		VectorXd Weight_acceleration;
 		VectorXd posture_weight;

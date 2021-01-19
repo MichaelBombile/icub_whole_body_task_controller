@@ -44,6 +44,7 @@ class TasksReferences
 {
 	
 		int n_actuated_dofs;
+		int count;
 
 	public:
 
@@ -64,6 +65,9 @@ class TasksReferences
 		WholeBodyTaskSpaceGains         wb_TS_gains;
 		// gain of the posture task
 		PostureGains		   			Ps_gains;
+
+		//
+		WholeBodyTaskSpaceTrajectories ini_wbTskRef;
 
 		//
 		// Filter object motion
@@ -88,7 +92,16 @@ class TasksReferences
 
 		bool get_desired_acceleration(  TaskSpaceStates TS_States_, TaskSpaceTrajectories  ref_TS_traj_, TaskSpaceGains   TS_gains_eef_,  Vector6d  F_external_, Vector6d  &desired_acceleration);
 
-		bool get_desired_centroidalMomentum(TaskSpaceStates            TS_StatesCoM_,
+		// bool get_desired_centroidalMomentum(TaskSpaceStates            TS_StatesCoM_,
+		//                                     TaskSpaceTrajectories 	   ref_Ts_traj_CoM_,
+		//                                     TaskSpaceGains             TS_gainsCoM_,
+		//                                     Vector6d                   F_external_CoM_,
+		//                                     Matrix6d                   CentroidalDynamicMatrix_,
+		//                                     Vector3d                   dotCentroidalInertia_mxI_,
+		//                                     Vector6d                   &desired_centroidalMomentum_dot);
+
+		bool get_desired_centroidalMomentum(ioStateManager 			   &ioSM_, 
+											TaskSpaceStates            TS_StatesCoM_,
 		                                    TaskSpaceTrajectories 	   ref_Ts_traj_CoM_,
 		                                    TaskSpaceGains             TS_gainsCoM_,
 		                                    Vector6d                   F_external_CoM_,
@@ -139,12 +152,12 @@ class TasksReferences
                                 double delay_);
 
 		// =====================================================
-		void posture_management(int 		contact_confidence,
-								VectorXd    jts_position,
-		                        VectorXd    init_ref_jts_posture,
-		                        VectorXd    old_Weight_posture,
-		                        VectorXd&   new_Weight_posture,
-		                        VectorXd&   ref_jts_posture);
+		void get_JS_posture_references(int 		contact_confidence,
+										VectorXd    jts_position,
+				                        VectorXd    init_ref_jts_posture,
+				                        VectorXd    old_Weight_posture,
+				                        VectorXd&   new_Weight_posture,
+				                        VectorXd&   ref_jts_posture);
 
 
 
@@ -177,7 +190,7 @@ class TasksReferences
 		// Manipulation();
 		// ~Manipulation();
 
-		void get_bimanip_references(ControllerParameters &ctrl_param, Object_to_Grasp &object2grasp, ioStateManager &ioSM, bool RRetract_, bool isLift, WholeBodyTaskSpaceTrajectories &wbTskRef);
+		void get_TS_bimanip_references(ControllerParameters &ctrl_param, Object_to_Grasp &object2grasp, ioStateManager &ioSM, bool RRetract_, bool isLift, WholeBodyTaskSpaceTrajectories &wbTskRef);
 
 		Vector6d get_hands_ref_acceleration(std::string hand, Matrix6d g_imp_u, Matrix6d g_imp_c, ioStateManager &ioSM_, bool wConstr);
 		void get_hands_ref_impedance_forces(ioStateManager &ioSM_, bool isoImp);
@@ -189,7 +202,7 @@ class TasksReferences
 
 		BalanceReference        balanceRef;                 // Bimanual Manicontroller
 
-		FeedForwardController   ff_ctrl;                // Feeforward Controller with anticopatory action
+		FeedForwardController   ff_ctrl;                	// Feeforward Controller with anticopatory action
 
 
 		// ---------------------------------
@@ -198,16 +211,81 @@ class TasksReferences
 		Vector3d pred_CoP_robot;
 		Vector3d Ref_CoP_robot;
 		Vector2d ref_CoM_xy;
+		double   d_theta_torso_pitch;
+
+		double 	timeCmdsStep;
+		bool 	StepInitiated;
+		bool 	isReachable;
+
+
+		bool ReleaseAndRetract;
+		bool StartRelease;
+		bool isLifting;
+
+		bool executing_step;
+		bool SwitchStep;
+		bool StepCompleted;
+
+		int iter_sm;
+		int iter_g;
+		int stepCount;
+		int nSampleStep;
+		double t_EndStep;
+		VectorXd ref_step;
+
+		double t_Contact;
+		bool  isContact;
+
 
 		VectorXd Disturb_cx_;
 		VectorXd Disturb_cy_;
+		Vector2d Disturb_c;
 
 		Vector2d get_ref_CoM_trajectory(WbRobotModel& robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, 
 								VectorXd ID_WrenchesFeet, VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, 
 								Vector3d desCoP_absF, bool RRetract_, bool &StartRelease_, int &iter_sm_);
 
+		Vector3d compute_task_ref_CoP(WbRobotModel& robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, VectorXd ID_WrenchesFeet, Vector3d desCoP_absF,  bool RRetract_);
+
+		Vector2d compute_ffwd_task_ref_CoM_xy(VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, Vector3d Ref_CoP_robot_, bool RRetract_, bool &StartRelease_, int &iter_sm_, Vector3d fmmCoM_);
+
+		void get_ffctrl_references(	WbRobotModel& m_robot_model_, ioStateManager &ioSM_, bool &SwitchStep, bool &executing_step, bool &StepCompleted, 
+									int &stepCount, int nSampleStep, std::string &stance_ft, Vector7d des_X_EE[], VectorXd Wrench_hands_star, VectorXd &ref_step, VectorXd &Joints_pos_cmds);
+
+		bool InitiateStepping(ioStateManager &ioSM_, VectorXd ref_step, VectorXd &Joints_pos_cmds);
+
+		bool get_TS_balance_references(WbRobotModel& m_robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, VectorXd ID_WrenchesFeet, Vector3d desCoP_absF, VectorXd Wrench_hands_star, 
+                                std::string stance_ft, double &t_EndStep, Vector7d (&des_X_EE)[8], WholeBodyTaskSpaceTrajectories &wbTskRef);
+
+		bool get_TS_posture_references(ControllerParameters &ctrl_param, ioStateManager &ioSM_, WholeBodyTaskSpaceTrajectories &wbTskRef, Vector7d (&des_X_EE)[8]);  // Pelvis and Chest
 
 
+		// estimation of the reaching dynamics
+		// -------------------------------------
+		// Vector7d des_pose_lh;
+		// Vector7d des_pose_rh;
+		// Vector6d velo_obj;
+		// compute the hands error norm
+		VectorXd xe_lh;
+		VectorXd ye_lh;
+		VectorXd xe_rh;
+		VectorXd ye_rh;
+
+		double hand_error;
+		double hand_error_tol;
+		double time2contact;
+		double time2release;
+
+
+		double compute_hand_error_norm(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector7d des_hand_pos, std::string hand);
+
+		double compute_hand_error_dot_norm(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector6d velo_obj, std::string hand);
+
+		double estimate_time2contact(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector7d des_pos_lhand, Vector7d des_pos_rhand, Vector6d velo_obj);
+
+		//
+		Matrix6d WrenchMapMx(Vector7d pose);
+		Vector6d RotateWrench(Vector7d pose, Vector6d Wrench);
 
 };
 

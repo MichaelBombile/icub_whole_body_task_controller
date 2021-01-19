@@ -33,12 +33,12 @@ WlkData_logging::~WlkData_logging()
     std::cout << " WlkData_logging All Closed " << std::endl;
 }
 
-void WlkData_logging::InitializeLogger()
+void WlkData_logging::InitializeLogger(std::string data_number)
 {
-    logPatterns         = "./PatternsData.txt";
-    logFeetTrajectories = "./FeetTrajectoriesData.txt";
-    logJointsPosValues  = "./JointsPosData.txt";
-    logFeetForceTorques = "./FeetForceTorquesData.txt";
+    logPatterns         = "../Data/PatternsData_"           + data_number + ".txt";
+    logFeetTrajectories = "../Data/FeetTrajectoriesData_"   + data_number + ".txt";
+    logJointsPosValues  = "../Data/JointsPosData_"          + data_number + ".txt";
+    logFeetForceTorques = "../Data/FeetForceTorquesData_"   + data_number + ".txt";
 
     // flog_Pattern  = new std::ofstream(logPatterns.c_str());
     // flog_FeetTraj = new std::ofstream(logFeetTrajectories.c_str());

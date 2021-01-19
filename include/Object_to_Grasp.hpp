@@ -338,6 +338,9 @@ class Object_to_Grasp
             // Initialize the filter
             filter_gain_Object = 5.0;  // pole of the filter
             ObjectFilter.InitializeFilter(period_sec, filter_gain_Object, filter_gain_Object, ObjectPoseEstimate);
+
+            filtered_ObjectPoseEstimate  = ObjectFilter.getRK4Integral(ObjectPoseEstimate);
+            dot_ObjectPoseEstimate       = filter_gain_Object * (ObjectPoseEstimate - filtered_ObjectPoseEstimate);
             
 
             isObjectPortOpen = true;

@@ -28,6 +28,7 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 	
 	// initialization
 	// =================================================
+	count = 0;
 	n_actuated_dofs = ctrl_param.actuatedDofs;
 	//
 	wb_desired_acceleration.initialize(n_actuated_dofs+6);
@@ -81,7 +82,7 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 
 	vM_CoM_ <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
 	vD_CoM_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
-	vK_CoM_ <<  10.0,    10.0,  5.0,   20.0, 20.0, 20.0;  
+	vK_CoM_ <<  20.0,    10.0,  5.0,   20.0, 20.0, 20.0;  
 
 	// vM_Pelvis_ <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
 	// vD_Pelvis_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
@@ -94,10 +95,48 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 	vD_Chest_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
 	vK_Chest_ <<  10.0,    10.0,  5.0,   20.0, 20.0, 20.0;
 
-	// vM_Chest_ <<   1.0,   1.0,   1.0,  1.0,    1.0,   1.0; 
-	// vD_Chest_ <<  12.0,  12.0,  12.0,  12.0,  12.0,  12.0; 
-	// vK_Chest_ <<  30.0,  30.0,  30.0,  30.0,  30.0,  30.0;
-	// vD_Chest_ *=1.5;
+
+
+
+	// vM_lhand_ <<   1.0,   1.0,   1.0,  1.0,    1.0,   1.0; 
+	// vD_lhand_ <<  12.0,  12.0,  12.0,  12.0,  12.0,  12.0; 
+	// vK_lhand_ <<  30.0,  30.0,  30.0,  30.0,  30.0,  30.0;
+	// vD_lhand_ *=1.5;
+	// vD_lhand_ *= 0.0;
+	// vK_lhand_ *= 0.0;
+
+	// vM_rhand_ <<  1.0,    1.0,   1.0,   1.0,   1.0,   1.0; 
+	// vD_rhand_ <<  12.0,  12.0,  12.0,  12.0,  12.0,  12.0; 
+	// vK_rhand_ <<  30.0,  30.0,  30.0,  30.0,  30.0,  30.0;
+	// vD_rhand_ *= 1.5;
+	// vD_rhand_ *= 0.0;
+	// vK_rhand_ *= 0.0;
+
+
+	// vM_lfoot_ <<    1.0,    1.0,    1.0,   1.0,    1.0,   1.0; 
+	// vD_lfoot_ <<   20.0,   20.0,   20.0,  20.0,   20.0,  20.0; 
+	// vK_lfoot_ <<  100.0,  100.0,  100.0, 100.0,  100.0, 100.0;
+
+	// vM_rfoot_ <<    1.0,    1.0,    1.0,   1.0,    1.0,   1.0;
+	// vD_rfoot_ <<   20.0,   20.0,   20.0,  20.0,   20.0,  20.0;
+	// vK_rfoot_ <<  100.0,  100.0,  100.0, 100.0,  100.0, 100.0;
+
+	// vM_CoM_ <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
+	// vD_CoM_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
+	// vK_CoM_ <<  20.0,    10.0,  5.0,   20.0, 20.0, 20.0;  
+
+	// // vM_Pelvis_ <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
+	// // vD_Pelvis_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
+	// // vK_Pelvis_ <<  10.0,    10.0,  5.0,   20.0, 20.0, 20.0;
+	// vM_Pelvis_ <<   1.0,   1.0,   1.0,  1.0,    1.0,   1.0; 
+	// vD_Pelvis_ <<   12.0,  12.0,  12.0,  12.0,  12.0,  12.0;  
+	// vK_Pelvis_ <<   30.0,  30.0,  30.0,  30.0,  30.0,  30.0;
+
+	// vM_Chest_ <<   2.0,    2.0,   2.0,    2.0,  2.0,  2.0; 
+	// vD_Chest_ <<   10.0,   10.0,  6.5,   15.0, 15.0, 15.0;  
+	// vK_Chest_ <<  10.0,    10.0,  5.0,   20.0, 20.0, 20.0;
+
+
 
 
 	// CONTROL PARAMETERS HERE
@@ -113,6 +152,8 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 	isTaskReferenceActive = false;
 	// Task space motion
 	wb_reference_TS_trajectories 	= 	ref_TS_trajectories_;
+
+	ini_wbTskRef 					= wb_reference_TS_trajectories;
 	// reference posture
 	reference_joints_posture	    = 	ref_joints_posture;
 
@@ -123,7 +164,7 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 	nu_Wh = 0.0;
 	nu_Ao = 0.0;
     //
-    Vector6d g_u; g_u << 60.0, 60.0, 60.0, 40.0, 40.0, 40.0;
+    Vector6d g_u; g_u << 50.0, 50.0, 50.0, 30.0, 30.0, 30.0;
     Vector6d g_c; g_c <<  1.0,  1.0,  1.0,  0.0,  0.0,  0.0;
 
 	Damping_UnconsHand  = g_u.asDiagonal();
@@ -182,6 +223,52 @@ void TasksReferences::TasksReferences_Init(	WbRobotModel& robot_model_, Controll
 	ref_CoM_xy 	= ioSM.wbTS.CoM.Pose.head(2);
 	Disturb_cx_ = VectorXd::Ones(ff_ctrl.ComRefGen.nsp);
 	Disturb_cy_ = VectorXd::Ones(ff_ctrl.ComRefGen.nsp);
+	Disturb_c   = Vector2d(0.,0.);
+
+	// 
+	d_theta_torso_pitch = 0.0*M_PI/180.;
+	timeCmdsStep	   = yarp::os::Time::now();
+	t_EndStep   	   = yarp::os::Time::now();
+	StepInitiated 	   = false;
+	isReachable   	   = false;
+	//
+	ReleaseAndRetract  = false;
+	StartRelease       = false;
+	isLifting   	   = false;
+
+	executing_step     = false;
+	SwitchStep   	   = false;
+	StepCompleted      = false;
+
+	iter_sm    		   = 0;
+	iter_g 	  		   = 0;
+	stepCount   	   = 0;
+	nSampleStep   	   = balanceRef.step_ctrl.Parameters->nsp;
+	
+	ref_step  		   = VectorXd::Zero(8);
+	//
+	t_Contact = yarp::os::Time::now();
+	isContact = false;
+
+	//
+	Vector7d des_pose_lh = Transforms.HomogenousMx2PoseVector(object2grasp.w_H_Gpoints[0]);  // left hand      //IDctrl->wbTS.lhand.Pose;      
+	Vector7d des_pose_rh = Transforms.HomogenousMx2PoseVector(object2grasp.w_H_Gpoints[1]);  // right hand     //IDctrl->wbTS.rhand.Pose;
+	Vector6d velo_obj    = VectorXd::Zero(6);
+	// compute the hands error norm
+	xe_lh = VectorXd::Zero(100);
+	ye_lh = VectorXd::Zero(100);
+	xe_rh = VectorXd::Zero(100);
+	ye_rh = VectorXd::Zero(100);
+	xe_lh(0) = this->compute_hand_error_norm(ioSM, ctrl_param, des_pose_lh, "left");
+	ye_lh(0) = this->compute_hand_error_dot_norm(ioSM, ctrl_param, velo_obj, "left");
+	xe_rh(0) = this->compute_hand_error_norm(ioSM, ctrl_param, des_pose_rh, "right");
+	ye_rh(0) = this->compute_hand_error_dot_norm(ioSM, ctrl_param, velo_obj, "right");
+
+	hand_error_tol = ctrl_param.tol_dist2contact;
+	hand_error     = 0.5*(this->compute_hand_error_norm(ioSM, ctrl_param, des_pose_lh, "left") + this->compute_hand_error_norm(ioSM, ctrl_param, des_pose_rh, "right"));
+
+	time2contact = 100.;
+	time2release = 10000.;
 
 }
 //
@@ -206,7 +293,35 @@ bool TasksReferences::get_desired_acceleration(	TaskSpaceStates  TS_States_, Tas
 
 
 //
-bool TasksReferences::get_desired_centroidalMomentum(TaskSpaceStates 			TS_StatesCoM_,
+// bool TasksReferences::get_desired_centroidalMomentum(TaskSpaceStates 			TS_StatesCoM_,
+// 													 TaskSpaceTrajectories 	    ref_Ts_traj_CoM_,
+// 													 TaskSpaceGains				TS_gainsCoM_,
+// 													 Vector6d 					F_external_CoM_,
+// 													 Matrix6d 					CentroidalDynamicMatrix_,
+// 													 Vector3d 					dotCentroidalInertia_mxI_,
+// 													 Vector6d 					&desired_centroidalMomentum_dot)
+// {
+// 	// pose error
+// 	Vector6d CoM_pose_error = Transforms.computePoseErrorNormalizedAxisAngle(TS_StatesCoM_.Pose, ref_Ts_traj_CoM_.pose);
+// 	// velocity twist and pose errors
+// 	Vector6d CoM_velocity_error = TS_StatesCoM_.Velo - ref_Ts_traj_CoM_.velocity;
+// 	//
+// 	Vector6d bias_forces_momentum_CoM;		bias_forces_momentum_CoM.setZero();
+// 	bias_forces_momentum_CoM.tail(3) = dotCentroidalInertia_mxI_.asDiagonal() * TS_StatesCoM_.Velo.segment<3>(3);
+// 	desired_centroidalMomentum_dot   = CentroidalDynamicMatrix_ * (ref_Ts_traj_CoM_.acceleration - TS_gainsCoM_.invM * ((TS_gainsCoM_.D * CoM_velocity_error 
+// 																													 + TS_gainsCoM_.K * CoM_pose_error) 
+// 																													 - F_external_CoM_))
+// 								    																				 + 0.0*bias_forces_momentum_CoM;
+
+// 	std::cout << " ref_Ts_traj_CoM_.velocity: \t" << ref_Ts_traj_CoM_.velocity.transpose() << endl;							    																				 
+// 	std::cout << " CoM_pose_error: \t" << CoM_pose_error.transpose() << endl;
+// 	std::cout << " desired_centroidalMomentum_dot : \t" << desired_centroidalMomentum_dot.transpose() << endl;
+// 	std::cout << " CentroidalDynamicMatrix_ : \n" << CentroidalDynamicMatrix_ << endl;
+// 	return true;
+// }
+
+bool TasksReferences::get_desired_centroidalMomentum(ioStateManager 			&ioSM_,
+													 TaskSpaceStates 			TS_StatesCoM_,
 													 TaskSpaceTrajectories 	    ref_Ts_traj_CoM_,
 													 TaskSpaceGains				TS_gainsCoM_,
 													 Vector6d 					F_external_CoM_,
@@ -218,15 +333,25 @@ bool TasksReferences::get_desired_centroidalMomentum(TaskSpaceStates 			TS_State
 	Vector6d CoM_pose_error = Transforms.computePoseErrorNormalizedAxisAngle(TS_StatesCoM_.Pose, ref_Ts_traj_CoM_.pose);
 	// velocity twist and pose errors
 	Vector6d CoM_velocity_error = TS_StatesCoM_.Velo - ref_Ts_traj_CoM_.velocity;
+
+	Vector6d DampCM;
+	DampCM.head(3) = Vector3d(0.0, 0.0, 0.0);
+	DampCM.tail(3) = Vector3d(0.0, 0.0, 0.0);
 	//
 	Vector6d bias_forces_momentum_CoM;		bias_forces_momentum_CoM.setZero();
 	bias_forces_momentum_CoM.tail(3) = dotCentroidalInertia_mxI_.asDiagonal() * TS_StatesCoM_.Velo.segment<3>(3);
 	desired_centroidalMomentum_dot   = CentroidalDynamicMatrix_ * (ref_Ts_traj_CoM_.acceleration - TS_gainsCoM_.invM * ((TS_gainsCoM_.D * CoM_velocity_error 
 																													 + TS_gainsCoM_.K * CoM_pose_error) 
 																													 - F_external_CoM_))
-								    																				 + 0.0*bias_forces_momentum_CoM;
+								    																				 + 0.0*bias_forces_momentum_CoM; // - DampCM.asDiagonal()*TS_gainsCoM_.D * ioSM_.Jacobian_centro_momentum * ioSM_.q_dot;
+
+	// std::cout << " ref_Ts_traj_CoM_.velocity: \t" << ref_Ts_traj_CoM_.velocity.transpose() << endl;							    																				 
+	// std::cout << " CoM_pose_error: \t" << CoM_pose_error.transpose() << endl;
+	// std::cout << " desired_centroidalMomentum_dot : \t" << desired_centroidalMomentum_dot.transpose() << endl;
+	// std::cout << " CentroidalDynamicMatrix_ : \n" << CentroidalDynamicMatrix_ << endl;
 	return true;
 }
+
 
 //
 bool TasksReferences::get_desired_acceleration_posture(	JointspaceStates 			JtsStates,
@@ -281,7 +406,8 @@ bool TasksReferences::get_stack_of_motion_tasks(ioStateManager 					&ioSM_,
 	ok = ok && get_desired_acceleration(ioSM_.wbTS.rfoot,     wb_ref_TS_traj_.rfoot, wb_TS_gains.rfoot, F_imp_.rfoot, wb_des_acceleration_.rfoot);
 	ok = ok && get_desired_acceleration(ioSM_.wbTS.Chest,     wb_ref_TS_traj_.Chest, wb_TS_gains.Chest, F_imp_.Chest, wb_des_acceleration_.Chest);
 	ok = ok && get_desired_acceleration(ioSM_.wbTS.Pelvis,    wb_ref_TS_traj_.Pelvis, wb_TS_gains.Pelvis, F_imp_.Pelvis, wb_des_acceleration_.Pelvis);
-	ok = ok && get_desired_centroidalMomentum(ioSM_.wbTS.CoM, wb_ref_TS_traj_.CoM,   wb_TS_gains.CoM,   F_imp_.CoM,   ioSM_.CentroidalDynamicMatrix, ioSM_.dotCentroidalInertia_mxI, wb_des_acceleration_.CMdot);
+	// ok = ok && get_desired_centroidalMomentum(ioSM_.wbTS.CoM, wb_ref_TS_traj_.CoM,   wb_TS_gains.CoM,   F_imp_.CoM,   ioSM_.CentroidalDynamicMatrix, ioSM_.dotCentroidalInertia_mxI, wb_des_acceleration_.CMdot);
+	ok = ok && get_desired_centroidalMomentum(ioSM_, ioSM_.wbTS.CoM, wb_ref_TS_traj_.CoM,   wb_TS_gains.CoM,   F_imp_.CoM,   ioSM_.CentroidalDynamicMatrix, ioSM_.dotCentroidalInertia_mxI, wb_des_acceleration_.CMdot);
 	ok = ok && get_desired_acceleration_posture(ioSM_.JtsStates, ioSM_.wbTS.Pelvis, wb_ref_TS_traj_.Pelvis, ref_jts_posture_, wb_TS_gains.Pelvis, wb_des_acceleration_.posture);
 	
 	return ok;
@@ -348,11 +474,12 @@ bool TasksReferences::get_object_effective_wrench( 	Object_to_Grasp& 	  object2g
 		                                           	Vector6d& 			  Desired_object_wrench)
 {
 	//
-	Vector6d desired_object_acceleration = ref_traj_Obj.acceleration - object_damping_gain_ * 2.*(0.*object2grasp_.States_Object.velocity - ref_traj_Obj.velocity);
+	Vector6d desired_object_acceleration = ref_traj_Obj.acceleration - object_damping_gain_ * 2.*(1.0*object2grasp_.States_Object.velocity - ref_traj_Obj.velocity);
 
-	Matrix6d impObject; 	Vector6d gain_imp_obj;  gain_imp_obj << 0.3, 0.3, 0.3, 0.1, 0.1, 0.1;
+	Matrix6d impObject; 	Vector6d gain_imp_obj;  gain_imp_obj << 0.2, 0.2, 0.2, 0.0005, 0.0005, 0.0005;
 	impObject = gain_imp_obj.asDiagonal();
-	Desired_object_wrench = (object2grasp_.Mo_world + impObject)* desired_object_acceleration + object2grasp_.bo_world - F_external_object_;
+	// Desired_object_wrench = (object2grasp_.Mo_world + 0.0*impObject)* desired_object_acceleration + object2grasp_.bo_world - F_external_object_;
+	Desired_object_wrench = (object2grasp_.Mo_world + 0.0*impObject)* desired_object_acceleration + object2grasp_.bo_world - F_external_object_;
 
 	return true;
 }
@@ -473,12 +600,12 @@ void TasksReferences::moveToLegPosture( RobotInterface& robot_interface_,
 
 // ==========================================================================================================================
 
-void TasksReferences::posture_management(	int 		contact_confidence,
-											VectorXd    jts_position,
-					                        VectorXd    init_ref_jts_posture,
-					                        VectorXd    old_Weight_posture,
-					                        VectorXd&   new_Weight_posture,
-					                        VectorXd&   ref_jts_posture)
+void TasksReferences::get_JS_posture_references(	int 		contact_confidence,
+													VectorXd    jts_position,
+							                        VectorXd    init_ref_jts_posture,
+							                        VectorXd    old_Weight_posture,
+							                        VectorXd&   new_Weight_posture,
+							                        VectorXd&   ref_jts_posture)
 {   
     if(n_actuated_dofs == 29)
     {
@@ -584,8 +711,8 @@ void TasksReferences::posture_management(	int 		contact_confidence,
             ref_jts_posture(23)  = jts_position(23); 
         }
 
-        //
-        // left shoulder roll
+        // //
+        // // left shoulder roll
         // if(jts_position(4)  < 15.*M_PI/180.) {
         //     ref_jts_posture(4)  = 15.*M_PI/180.; 
         //     new_Weight_posture(10) = 10000* old_Weight_posture(10);
@@ -602,8 +729,8 @@ void TasksReferences::posture_management(	int 		contact_confidence,
         //     ref_jts_posture(11)  = jts_position(11); 
         // }
 
-        // ref_jts_posture(4)  = 45.*M_PI/180.;  // shoulder roll
-        // ref_jts_posture(11) = 45.*M_PI/180.;  // shoulder roll
+        ref_jts_posture(4)  = 45.*M_PI/180.;  // shoulder roll
+        ref_jts_posture(11) = 45.*M_PI/180.;  // shoulder roll
  
     }
 
@@ -623,7 +750,7 @@ void TasksReferences::close()
     }
 }
 
-void TasksReferences::get_bimanip_references(ControllerParameters &ctrl_param, Object_to_Grasp &object2grasp, ioStateManager &ioSM,
+void TasksReferences::get_TS_bimanip_references(ControllerParameters &ctrl_param, Object_to_Grasp &object2grasp, ioStateManager &ioSM,
 								  bool RRetract_, bool isLift, WholeBodyTaskSpaceTrajectories &wbTskRef)
 {
 	// ==================================================================
@@ -636,7 +763,22 @@ void TasksReferences::get_bimanip_references(ControllerParameters &ctrl_param, O
 
     if(RRetract_){  FreeMotionCtrl->Release_and_Retract2( object2grasp, ioSM); 
     }
-    else if(isLift){ FreeMotionCtrl->getBimanualConstrainedMotion( cp_desH_Obj, object2grasp.Ref_Object.pose, ioSM);
+    else if(isLift){  
+    		// cp_desH_Obj[0]     = Transforms.PoseVector2HomogenousMx(object2grasp.Obj_Pose_Gpoints[0]);
+			// cp_desH_Obj[1]     = Transforms.PoseVector2HomogenousMx(object2grasp.Obj_Pose_Gpoints[1]);
+			Vector6d w_l_arm_FT_meas = this->RotateWrench(ioSM.w_Pose_laFTs, ioSM.robot_interface.l_arm_FT_vector);
+			Vector6d w_r_arm_FT_meas = this->RotateWrench(ioSM.w_Pose_raFTs, ioSM.robot_interface.r_arm_FT_vector);
+
+
+
+			// cp_desH_Obj[0](2,3) += 0.02 - 2.5*(w_l_arm_FT_meas(1) - 20.0); 
+			// cp_desH_Obj[1](2,3) -= 0.02 - 2.5*(w_r_arm_FT_meas(1) - 20.0);
+			// cp_desH_Obj[0](2,3) +=  (-1.5*(w_l_arm_FT_meas(1) - 20.0)); 
+			// cp_desH_Obj[1](2,3) -=  (-1.5*(-w_r_arm_FT_meas(1) - 20.0));
+			// cp_desH_Obj[0](2,3) +=  (-1.5*(0.5*fabs(w_l_arm_FT_meas(1) + w_r_arm_FT_meas(1)) - 15.0)); 
+			// cp_desH_Obj[1](2,3) -=  (-1.5*(0.5*fabs(w_l_arm_FT_meas(1) + w_r_arm_FT_meas(1)) - 15.0));
+    	FreeMotionCtrl->getBimanualConstrainedMotion( cp_desH_Obj, object2grasp.Ref_Object.pose, ioSM);  
+    	// FreeMotionCtrl->getBimanualConstrainedMotion( cp_desH_Obj, object2grasp.States_Object.pose, ioSM);
     }
     else {  FreeMotionCtrl->compute_Reach2GraspMotion2(  object2grasp, ioSM); 
     }
@@ -650,10 +792,12 @@ void TasksReferences::get_bimanip_references(ControllerParameters &ctrl_param, O
     CooperativeCtrl.computeControlWrench(nu_Wh,  object2grasp, ioSM, Desired_object_wrench);
     CooperativeCtrl.get_TaskConsistentHandsVelocity(object2grasp.period_sec, nu_Wh*object2grasp.Ref_Object.velocity);                                   // Motion distribution between the hands 
     //
-    if(ctrl_param.apply_wrench && CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)  
+    // if(ctrl_param.apply_wrench && CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)  
+    if(CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)  
     {
-        nu_Wh	= 0.95*nu_Wh + 0.05;
-        nu_Ao	= 0.98*nu_Ao + 0.02;
+        nu_Wh	= 0.80*nu_Wh + 0.20;
+        // nu_Wh	= 0.95*nu_Wh + 0.05;
+        nu_Ao	= 0.92*nu_Ao + 0.08;
     }
     else
     {
@@ -691,8 +835,9 @@ void TasksReferences::get_bimanip_references(ControllerParameters &ctrl_param, O
     //---------
     Vector6d act_ft = VectorXd::Zero(6);    
     		 act_ft << nu_Ao, nu_Wh, nu_Ao, nu_Ao, nu_Ao, nu_Ao;
-    appWrench_lhand = act_ft.asDiagonal() * (-CooperativeCtrl.F_applied_lhand) - F_imp_lh;
-    appWrench_rhand = act_ft.asDiagonal() * (-CooperativeCtrl.F_applied_rhand) - F_imp_rh;
+    // act_ft << nu_Wh, nu_Wh, nu_Wh, nu_Wh, nu_Wh, nu_Wh;
+    appWrench_lhand = 0.3*act_ft.asDiagonal() * (-CooperativeCtrl.F_applied_lhand) - F_imp_lh;
+    appWrench_rhand = 0.3*act_ft.asDiagonal() * (-CooperativeCtrl.F_applied_rhand) - F_imp_rh;
 
 }
 
@@ -739,8 +884,8 @@ void TasksReferences::get_hands_ref_impedance_forces(ioStateManager &ioSM_, bool
     double epsil_bq = 1e-10;
     MatrixXd BasisQ_lh = MatrixXd::Random(3,3);      
     MatrixXd BasisQ_rh = MatrixXd::Random(3,3);
-    BasisQ_lh.block<3,1>(0,0) = (1.-nu_Wh) * FreeMotionCtrl->w_velocity_eef[0].head(3); 
-    BasisQ_rh.block<3,1>(0,0) = (1.-nu_Wh) * FreeMotionCtrl->w_velocity_eef[1].head(3);  
+    BasisQ_lh.block<3,1>(0,0) = (1.-nu_Wh*0.0) * FreeMotionCtrl->w_velocity_eef[0].head(3); 
+    BasisQ_rh.block<3,1>(0,0) = (1.-nu_Wh*0.0) * FreeMotionCtrl->w_velocity_eef[1].head(3);  
     BasisQ_lh(0,0) += epsil_bq;
     BasisQ_rh(0,0) += epsil_bq;
 
@@ -756,10 +901,10 @@ void TasksReferences::get_hands_ref_impedance_forces(ioStateManager &ioSM_, bool
     }
     
     //
-    F_imp_lh.head(3) = (1.-nu_Wh) * Damping_pos_lh * (FreeMotionCtrl->w_velocity_eef[0].head(3) - ioSM_.wbTS.lhand.Velo.head(3));
-    F_imp_rh.head(3) = (1.-nu_Wh) * Damping_pos_rh * (FreeMotionCtrl->w_velocity_eef[1].head(3) - ioSM_.wbTS.rhand.Velo.head(3));
-    F_imp_lh.tail(3) = (1.-nu_Wh) * hands_gains.tail(3).asDiagonal() * FreeMotionCtrl->w_velocity_eef[0].tail(3);
-    F_imp_rh.tail(3) = (1.-nu_Wh) * hands_gains.tail(3).asDiagonal() * FreeMotionCtrl->w_velocity_eef[1].tail(3);
+    F_imp_lh.head(3) = (1.-nu_Wh*0.0) * Damping_pos_lh * (FreeMotionCtrl->w_velocity_eef[0].head(3) - ioSM_.wbTS.lhand.Velo.head(3));
+    F_imp_rh.head(3) = (1.-nu_Wh*0.0) * Damping_pos_rh * (FreeMotionCtrl->w_velocity_eef[1].head(3) - ioSM_.wbTS.rhand.Velo.head(3));
+    F_imp_lh.tail(3) = (1.-nu_Wh*0.0) * hands_gains.tail(3).asDiagonal() * FreeMotionCtrl->w_velocity_eef[0].tail(3);
+    F_imp_rh.tail(3) = (1.-nu_Wh*0.0) * hands_gains.tail(3).asDiagonal() * FreeMotionCtrl->w_velocity_eef[1].tail(3);
 
 }
 
@@ -788,65 +933,384 @@ VectorXd TasksReferences::get_expected_object_load(ControllerParameters &ctrl_pa
 }
 
 
-
-
-
-
-Vector2d TasksReferences::get_ref_CoM_trajectory(	WbRobotModel& robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, 
-													VectorXd ID_WrenchesFeet, VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, 
-													Vector3d desCoP_absF, bool RRetract_, bool &StartRelease_, int &iter_sm_)
+Vector3d TasksReferences::compute_task_ref_CoP(WbRobotModel& robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, VectorXd ID_WrenchesFeet, Vector3d desCoP_absF, bool RRetract_)
 {
-	
 	// compute the reference CoP
-    des_CoP_robot   = ioSM_.w_H_absF.block<3,3>(0,0) * desCoP_absF + ioSM_.w_H_absF.block<3,1>(0,3);                                      // desired resting CoP position 
-    pred_CoP_robot  = balanceRef.get_robot_feet_cop(ioSM_, ID_WrenchesFeet.head<6>(), ID_WrenchesFeet.tail<6>());   // Predicted CoP (using ID solution) 
-
+    des_CoP_robot   	 = ioSM_.w_H_absF.block<3,3>(0,0) * desCoP_absF + ioSM_.w_H_absF.block<3,1>(0,3);                // desired resting CoP position 
+    pred_CoP_robot  	 = balanceRef.get_robot_feet_cop(ioSM_, ID_WrenchesFeet.head<6>(), ID_WrenchesFeet.tail<6>());   // Predicted CoP (using ID solution) 
     //
-	if(ctrl_param.apply_wrench && CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)
-        ctrl_param.w_cop = 0.20;
+	// if(ctrl_param.apply_wrench && CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)
+	if(CooperativeCtrl.ContactConfidence ==1.0 && !RRetract_)
+        ctrl_param.w_cop = 0.10;
     else if(RRetract_) 
         ctrl_param.w_cop = 0.1;
     else 
         ctrl_param.w_cop = 0.90;
-
-    Ref_CoP_robot   = balanceRef.get_reference_CoP(robot_model_, ctrl_param, ioSM_, pred_CoP_robot, des_CoP_robot);   // TO DO : in two functions with and without ff_ctrl
-    
-
-
-
-
-
-
     //
-    double fu_z_mgbeta = 0.0;                   	
-    Vector2d Disturb_c = Vector2d(0.0, 0.0);    
+    Ref_CoP_robot   	 = balanceRef.get_reference_CoP(robot_model_, ctrl_param, ioSM_, pred_CoP_robot, des_CoP_robot);   // TO DO : in two functions with and without ff_ctrl
+
+    return Ref_CoP_robot;
+}
+
+// Vector2d TasksReferences::compute_ffwd_task_ref_CoM_xy(VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, Vector3d Ref_CoP_robot_, bool RRetract_, bool &StartRelease_, int &iter_sm_)
+// {
+// 	// ------------------------------------------------------
+//     double fu_z_mgbeta = 0.0;                   	
+//     Vector2d Disturb_c = Vector2d(0.0, 0.0);    
+
+//     if(CooperativeCtrl.ContactConfidence == 1.0) {
+//         ff_ctrl.a_ctrl.compute_perturbation_terms2(Wrench_hands_star, lh_pose.head(3), rh_pose.head(3), Vector3d(0.,0.,0.), Vector3d(0.,0.,0.), Disturb_c, fu_z_mgbeta);
+//     }
+//     else {
+//         fu_z_mgbeta = 0.0;
+//         Disturb_c   = Vector2d(0.0, 0.0);
+//     }
+
+// 	if(RRetract_){
+//         if(iter_sm_<(ff_ctrl.ComRefGen.nsp)) {
+//             Disturb_cx_(ff_ctrl.ComRefGen.nsp-1-iter_sm_)        = 0.0;          // step of the disturbance 
+//             Disturb_cy_(ff_ctrl.ComRefGen.nsp-1-iter_sm_)        = 0.0;          // step of the disturbance 
+//             iter_sm_ ++;
+//             if(iter_sm_ == ff_ctrl.ComRefGen.nsp) StartRelease_  = true;
+//         }
+//     } else {
+//         Disturb_cx_  = Disturb_c(0) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
+//         Disturb_cy_  = Disturb_c(1) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
+//     }
+//     // Apply the reference CoP to the CoM reference generator
+//     // -------------------------------------------------------
+//     Vector3d fmmCoM_ = Vector3d(0.10, 0.0, 0.0);
+//     // Vector2d refCoM_xy = ff_ctrl.generate_Com_reference(Disturb_cx_, Disturb_cy_, fu_z_mgbeta, ff_ctrl.fmmCoM, Ref_CoP_robot);
+//     Vector2d CoMxy   = ff_ctrl.generate_Com_reference(Disturb_cx_, Disturb_cy_, fu_z_mgbeta, fmmCoM_, Ref_CoP_robot_); //pred_CoP_robot); //
+
+// 	return CoMxy;
+// }
+Vector2d TasksReferences::compute_ffwd_task_ref_CoM_xy(VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, Vector3d Ref_CoP_robot_, bool RRetract_, bool &StartRelease_, int &iter_sm_, Vector3d fmmCoM_)
+{
+    // ------------------------------------------------------
+    double fu_z_mgbeta = 0.0;                       
+    // Vector2d Disturb_c = Vector2d(0.0, 0.0);    
+    Disturb_c = Vector2d(0.0, 0.0);
+
+
 
     if(CooperativeCtrl.ContactConfidence == 1.0) {
         ff_ctrl.a_ctrl.compute_perturbation_terms2(Wrench_hands_star, lh_pose.head(3), rh_pose.head(3), Vector3d(0.,0.,0.), Vector3d(0.,0.,0.), Disturb_c, fu_z_mgbeta);
     }
-    else {
+    else if(time2contact <= (ff_ctrl.ComRefGen.nsp*ff_ctrl.ComRefGen.sTime)-1.0)
+    {
+        ff_ctrl.a_ctrl.compute_perturbation_terms2(Wrench_hands_star, lh_pose.head(3), rh_pose.head(3), Vector3d(0.,0.,0.), Vector3d(0.,0.,0.), Disturb_c, fu_z_mgbeta);
+    }
+    else
+    {
         fu_z_mgbeta = 0.0;
         Disturb_c   = Vector2d(0.0, 0.0);
+        iter_g      = 0;
+        iter_sm_    = 0;
     }
 
-	if(RRetract_){
+    // cout << " XXXXXXXX       ///////////////     TIME START GRASP XXXXXXXXX        /////////////// \t" << (time2contact <= (ff_ctrl.ComRefGen.nsp*ff_ctrl.ComRefGen.sTime)-1.0) << endl;
+
+    // if(RRetract_ || (time2release <=(ff_ctrl.ComRefGen.nsp*ff_ctrl.ComRefGen.sTime))){
+    bool t2R = this->time2release <= (ff_ctrl.ComRefGen.nsp*ff_ctrl.ComRefGen.sTime);
+     // cout << " XXXXXXXX       ///////////////     TIME TO RELEASE XXXXXXXXX        /////////////// \t" << t2R << endl;
+    if(RRetract_ || false){
+    // if(RRetract_ ){
         if(iter_sm_<(ff_ctrl.ComRefGen.nsp)) {
             Disturb_cx_(ff_ctrl.ComRefGen.nsp-1-iter_sm_)        = 0.0;          // step of the disturbance 
             Disturb_cy_(ff_ctrl.ComRefGen.nsp-1-iter_sm_)        = 0.0;          // step of the disturbance 
             iter_sm_ ++;
             if(iter_sm_ == ff_ctrl.ComRefGen.nsp) StartRelease_  = true;
         }
-    } else {
+    } 
+    else if(CooperativeCtrl.ContactConfidence != 1.0 && time2contact <= (ff_ctrl.ComRefGen.nsp*ff_ctrl.ComRefGen.sTime)+1.0)
+    {
+        if(iter_g < ff_ctrl.ComRefGen.nsp) {
+            VectorXd SampHorizon = VectorXd::Zero(ff_ctrl.ComRefGen.nsp);
+            SampHorizon.tail(1+iter_g) = VectorXd::Ones(1+iter_g);
+            Disturb_cx_  = Disturb_c(0) * SampHorizon;
+            Disturb_cy_  = Disturb_c(1) * SampHorizon;
+            // cout << " XXXXXXXX       ///////////////     IN THIS PART GRASP XXXXXXXXX        /////////////// \t" << iter_g << endl;
+            iter_g ++;
+        }
+        else {
+        	Disturb_cx_  = Disturb_c(0) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
+        	Disturb_cy_  = Disturb_c(1) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
+        }
+    }
+    else 
+    {
         Disturb_cx_  = Disturb_c(0) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
         Disturb_cy_  = Disturb_c(1) * VectorXd::Ones(ff_ctrl.ComRefGen.nsp);    // step of the disturbance 
-    }
 
+        // cout << " XXXXXXXX       ///////////////     IN THIS PART NO GRASP XXXXXXXXX        /////////////// \t" << iter_g << endl;
+    }
     // Apply the reference CoP to the CoM reference generator
     // -------------------------------------------------------
-    Vector3d fmmCoM_ = Vector3d(0.10, 0.0, 0.0);
+    // Vector3d fmmCoM_ = Vector3d(0.10, 0.0, 0.0);
     // Vector2d refCoM_xy = ff_ctrl.generate_Com_reference(Disturb_cx_, Disturb_cy_, fu_z_mgbeta, ff_ctrl.fmmCoM, Ref_CoP_robot);
-    ref_CoM_xy = ff_ctrl.generate_Com_reference(Disturb_cx_, Disturb_cy_, fu_z_mgbeta, fmmCoM_, Ref_CoP_robot); //pred_CoP_robot); //
+    Vector2d CoMxy   = ff_ctrl.generate_Com_reference(Disturb_cx_, Disturb_cy_, fu_z_mgbeta, fmmCoM_, Ref_CoP_robot_); //pred_CoP_robot); //
+
+    return CoMxy;
+}
+
+Vector2d TasksReferences::get_ref_CoM_trajectory(	WbRobotModel& robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, 
+													VectorXd ID_WrenchesFeet, VectorXd Wrench_hands_star, Vector7d lh_pose, Vector7d rh_pose, 
+													Vector3d desCoP_absF, bool RRetract_, bool &StartRelease_, int &iter_sm_)
+{
+	// Ref Com without FeedForward controller actions
+	Vector3d Ref_CoP_robot_ = this->compute_task_ref_CoP(robot_model_, ctrl_param, ioSM_, ID_WrenchesFeet, desCoP_absF, RRetract_);
+    if(!ctrl_param.with_FFwdCtrl)	{
+    	ref_CoM_xy = Ref_CoP_robot_.head(2);
+    }
+    else 	{ // Ref CoM with FeedForward controller actions
+    	Vector3d fmmCoM_ = Vector3d(0.10, 0.0, 0.0);
+    	ref_CoM_xy = this->compute_ffwd_task_ref_CoM_xy(Wrench_hands_star, lh_pose, rh_pose, Ref_CoP_robot_, RRetract_, StartRelease_, iter_sm_, fmmCoM_);
+    }
 
     return ref_CoM_xy;
 }
 
+
+void TasksReferences::get_ffctrl_references(	WbRobotModel& m_robot_model_, ioStateManager &ioSM_, bool &SwitchStep, bool &executing_step, bool &StepCompleted, 
+												int &stepCount, int nSampleStep, std::string &stance_ft,
+												Vector7d des_X_EE[], VectorXd Wrench_hands_star, VectorXd &ref_step, VectorXd &Joints_pos_cmds)
+{                    
+    //
+	if(!executing_step) {
+
+	    ff_ctrl.aGstep_run_batch(m_robot_model_, ioSM_.JtsStates.position, Wrench_hands_star, des_X_EE, 
+	    						 ioSM_.wbTS.lfoot.Pose, ioSM_.wbTS.rfoot.Pose, stance_ft, executing_step, ref_step);
+	    	// executing_step = true;
+	    if(executing_step) InitiateStepping(ioSM_, ref_step, Joints_pos_cmds);
+	    nSampleStep = balanceRef.step_ctrl.Parameters->nsp;
+	}   
+	else if(executing_step)  {// should coorespond to pressing the 'b' key
+	    // perform the step at the end of the execution set executing_step back to phase
+	    if(fmod(count, 4)==0)   {
+	        balanceRef.generate_step_commands(m_robot_model_, ioSM_, SwitchStep, executing_step, StepCompleted, stepCount, nSampleStep, 
+	                                                        stance_ft, Vector3d(0.10, 0.0, 0.0), d_theta_torso_pitch,  Joints_pos_cmds);
+	        // update the stance foot
+	        ioSM_.stance_foot = stance_ft;
+	    }
+	    count ++;
+	    // executing_step = false;                 // desactivate the step exectution
+	}
+}
+
+
+//
+bool TasksReferences::InitiateStepping(ioStateManager &ioSM_, VectorXd ref_step, VectorXd &Joints_pos_cmds)
+{
+    //
+    StepInitiated  = true;
+    timeCmdsStep   = yarp::os::Time::now();
+    isReachable    = false;
+   	FreeMotionCtrl->gamma_reachable_p = 0.0;
+   	FreeMotionCtrl->gamma_reachable_o = 0.0;
+
+    ioSM_.Joints_pos_filtered_cmds = ioSM_.Joints_pos_cmds = ioSM_.JtsStates.position; //m_joints_sensor_wb.position;
+
+
+    // ref_step//
+    if(ref_step(6) == 1 && ref_step(7) ==0){
+       	balanceRef.step_ctrl.CpBalWlkController->stance_foot = "right";
+        // StepFoot_1 = ref_step.head(3);
+        // StepFoot_2.setZero();
+        nSampleStep = balanceRef.step_ctrl.Parameters->nsp;
+    }
+    else if(ref_step(6) == 0 && ref_step(7) == 1){
+       	balanceRef.step_ctrl.CpBalWlkController->stance_foot = "left";
+        // StepFoot_1 = ref_step.head(3);
+        // StepFoot_2.setZero();
+        nSampleStep = balanceRef.step_ctrl.Parameters->nsp;
+    }
+    else if(ref_step(6) == 1 && ref_step(7) == 1) {
+       	balanceRef.step_ctrl.CpBalWlkController->stance_foot = "right";
+        // StepFoot_1 = ref_step.head(3);
+        // StepFoot_2 = ref_step.segment(3,3);
+        nSampleStep = 2*balanceRef.step_ctrl.Parameters->nsp;
+    }
+    else{
+       	balanceRef.step_ctrl.CpBalWlkController->stance_foot = "right";
+        // StepFoot_1.setZero();
+        // StepFoot_2.setZero();
+        nSampleStep = balanceRef.step_ctrl.Parameters->nsp;
+    }   
+    return true;
+}
+
+
+bool TasksReferences::get_TS_balance_references(WbRobotModel& m_robot_model_, ControllerParameters &ctrl_param, ioStateManager &ioSM_, VectorXd ID_WrenchesFeet, Vector3d desCoP_absF, VectorXd Wrench_hands_star, 
+                                																		std::string stance_ft, double &t_EndStep, Vector7d (&des_X_EE)[8], WholeBodyTaskSpaceTrajectories &wbTskRef)
+{
+    
+    Vector3d Ref_CoP_robot_ = this->compute_task_ref_CoP(m_robot_model_, ctrl_param, ioSM_, ID_WrenchesFeet, desCoP_absF, ReleaseAndRetract);
+    // Ref CoM with FeedForward controller actions
+    if(!ctrl_param.with_FFwdCtrl) {
+        ref_CoM_xy = Ref_CoP_robot_.head(2);
+    }
+    else    // Ref CoM with FeedForward controller actions
+    {
+        // int nSampleStep = balanceRef.step_ctrl.Parameters->nsp;
+        // TasksRefs.get_ffctrl_references(  *m_robot_model, *ioSM, SwitchStep, executing_step, StepCompleted, stepCount, nSampleStep, stance_ft, des_X_EE, Wrench_hands_star, ref_step, Joints_pos_cmds);
+        if(!executing_step) {
+            ff_ctrl.aGstep_run_batch(m_robot_model_, ioSM_.JtsStates.position, Wrench_hands_star, des_X_EE, ioSM_.wbTS.lfoot.Pose, ioSM_.wbTS.rfoot.Pose, stance_ft, executing_step, ref_step);
+            // 
+            if(fmod(count, 20)==0) {
+            	Vector2d p_absHands = 0.5*(ioSM_.wbTS.lhand.Pose.head(2)+ioSM_.wbTS.lhand.Pose.head(2)) - ioSM_.w_Pose_absF.head(2);
+            	MatrixXd num_ = p_absHands.transpose() * ff_ctrl.fmmCoM.head(2);
+            	double deno_  = p_absHands.norm()*ff_ctrl.fmmCoM.head(2).norm();
+
+				double dir_ConstCoM = 1./(deno_ + 1e-10) * num_(0,0);
+				Vector3d fmmCoM_ = Vector3d(0.10, 0.0, 0.0);
+				if(dir_ConstCoM <= 0) 	fmmCoM_ = -ff_ctrl.fmmCoM;
+				else 					fmmCoM_ =  ff_ctrl.fmmCoM;
+
+                ref_CoM_xy = this->compute_ffwd_task_ref_CoM_xy(Wrench_hands_star, des_X_EE[0], des_X_EE[1], Ref_CoP_robot_, ReleaseAndRetract, StartRelease, iter_sm, fmmCoM_);
+            }
+            // executing_step = true && count < 10;
+            if(executing_step) InitiateStepping(ioSM_, ref_step, ioSM_.Joints_pos_cmds);
+        }   
+        else if(executing_step)  {// should coorespond to pressing the 'b' key
+            // perform the step at the end of the execution set executing_step back to phase
+            if(fmod(count, 4)==0)   {
+                balanceRef.generate_step_commands(m_robot_model_, ioSM_, SwitchStep, executing_step, StepCompleted, stepCount, nSampleStep, stance_ft, Vector3d(0.10, 0.0, 0.0), d_theta_torso_pitch,  ioSM_.Joints_pos_cmds);
+                // update the stance foot
+                ioSM_.stance_foot = stance_ft;
+                //
+                if(stepCount == (nSampleStep -1))
+                {
+                    // update the reference feet pose for the wb IK and ID.
+                    des_X_EE[2] = wbTskRef.lfoot.pose = ioSM_.wbTS.lfoot.Pose;
+                    des_X_EE[3] = wbTskRef.rfoot.pose = ioSM_.wbTS.rfoot.Pose; 
+                    //
+                    ioSM_.Joints_pos_filtered_cmds = ioSM_.Joints_pos_cmds = ioSM_.JtsStates.position; //m_joints_sensor_wb.position;
+                    reference_joints_posture.tail(12) = ioSM_.JtsStates.position.tail(12);
+                    // q_ref.tail(12)           = ioSM_.JtsStates.position.tail(12);  
+                }
+                t_EndStep = yarp::os::Time::now();
+            }
+            // executing_step = false;                 // desactivate the step exectution
+        }
+    }
+    count ++;
+    // desired CoM Motion tasks
+    // =========================================================================================================================
+    wbTskRef.CoM.pose    = ioSM_.wbTS.CoM.Pose;
+    wbTskRef.CoM.pose(0) = ref_CoM_xy(0);
+    wbTskRef.CoM.pose(1) = ref_CoM_xy(1); 
+    //
+    des_X_EE[4].head(3)  = wbTskRef.CoM.pose.head(3);
+    // if(ReleaseAndRetract || !TasksRefs.isReachable || isLifting || PreStepPosture)  {
+    if(ReleaseAndRetract || !isReachable || isLifting)  {
+        des_X_EE[4](1) = wbTskRef.CoM.pose(1) = this->des_CoP_robot(1);         // 
+        des_X_EE[4](2) = wbTskRef.CoM.pose(2) = ctrl_param.rest_height_com;     // 0.49;   //  TO DO : Put this in ctrl_param
+        // if(ReleaseAndRetract || !TasksRefs.isReachable || PreStepPosture) 
+        if(ReleaseAndRetract || !isReachable)
+            des_X_EE[4](0) = this->des_CoP_robot(0);
+        std::cout << " /// ============================== //// RFE COM POS : \t" << wbTskRef.CoM.pose.head(3).transpose() << std::endl;
+    } 
+
+    return true;
+}
+
+bool TasksReferences::get_TS_posture_references(ControllerParameters &ctrl_param, ioStateManager &ioSM_, WholeBodyTaskSpaceTrajectories &wbTskRef, Vector7d (&des_X_EE)[8])  // Pelvis and Chest
+{
+    if(CooperativeCtrl.ContactConfidence ==1.0 || ReleaseAndRetract || isLifting ){
+        // Motion
+        wbTskRef.Pelvis.pose   = ini_wbTskRef.Pelvis.pose;      wbTskRef.Pelvis.pose.tail<4>() <<  0.0, 0.0, 1.0, M_PI;
+        wbTskRef.Chest.pose    = ini_wbTskRef.Chest.pose;       wbTskRef.Chest.pose.tail<4>()  <<  1.0, 0.0, 0.0, M_PI/2.; //
+        // des_X_EE[7].tail(4)    = wbTskRef.Chest.pose.tail<4>();
+    }   else {
+        // Motion
+        wbTskRef.Pelvis.pose   = ioSM_.wbTS.Pelvis.Pose; 
+        wbTskRef.Chest.pose    = ioSM_.wbTS.Chest.Pose;
+        // des_X_EE[7].tail(4)    = ioSM_.wbTS.Chest.Pose.tail<4>();
+    }
+
+    return true;
+}
+
+
+double TasksReferences::compute_hand_error_norm(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector7d des_hand_pos, std::string hand)
+{
+    Matrix4d w_H_hand = MatrixXd::Identity(4,4);
+    if(hand == "right" || hand =="RIGHT")   {    // right
+        w_H_hand         = Transforms.PoseVector2HomogenousMx(ioSM_.wbTS.rhand.Pose);           
+        w_H_hand.block<3,1>(0,3) +=  w_H_hand.block<3,3>(0,0)*ctrl_param.hand_offset[1];
+    }
+    else  {
+        w_H_hand         = Transforms.PoseVector2HomogenousMx(ioSM_.wbTS.lhand.Pose);           
+        w_H_hand.block<3,1>(0,3) +=  w_H_hand.block<3,3>(0,0)*ctrl_param.hand_offset[0];
+    }
+    //
+    Matrix4d w_H_hand_des     = ioSM_.w_H_absF * Transforms.PoseVector2HomogenousMx(des_hand_pos);
+    double hand_error_norm    = (w_H_hand.block<3,1>(0,3) - w_H_hand_des.block<3,1>(0,3)).norm();
+
+    return hand_error_norm;
+}
+
+
+double TasksReferences::compute_hand_error_dot_norm(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector6d velo_obj, std::string hand)
+{	
+    Vector3d w_velo_hand = Vector3d(0.0, 0.0, 0.0);
+    if(hand == "right" || hand == "RIGHT")  
+        w_velo_hand   = ioSM_.wbTS.rhand.Velo.head(3);            
+    else  
+        w_velo_hand   = ioSM_.wbTS.lhand.Velo.head(3); 
+
+    double hand_error_dot_norm = (w_velo_hand-velo_obj.head(3)).norm();
+    //
+    // cout << " XXXXXXXXXXXXXXXXX  left  hand velocity XXXXXXXXXXXXXX IS : " << ioSM_.wbTS.lhand.Velo.head(3).transpose() << endl; 
+    // cout << " XXXXXXXXXXXXXXXXX  right hand velocity XXXXXXXXXXXXXX IS : " << ioSM_.wbTS.rhand.Velo.head(3).transpose() << endl; 
+    //
+    return hand_error_dot_norm;
+}
+
+
+double TasksReferences::estimate_time2contact(ioStateManager &ioSM_, ControllerParameters &ctrl_param, Vector7d des_pose_lh, Vector7d des_pose_rh, Vector6d velo_obj)
+{
+	//
+	xe_lh.tail(99) = xe_lh.head(99);
+	ye_lh.tail(99) = ye_lh.head(99);
+	xe_lh(0) = this->compute_hand_error_norm(ioSM_, ctrl_param, des_pose_lh, "left");
+	ye_lh(0) = this->compute_hand_error_dot_norm(ioSM_, ctrl_param, velo_obj, "left");
+
+	xe_rh.tail(99) = xe_rh.head(99);
+	ye_rh.tail(99) = ye_rh.head(99);
+	xe_rh(0) = this->compute_hand_error_norm(ioSM_, ctrl_param, des_pose_rh, "right");
+	ye_rh(0) = this->compute_hand_error_dot_norm(ioSM_, ctrl_param, velo_obj, "right");
+
+	//
+	MatrixXd deno = (xe_lh.transpose() * xe_lh + xe_rh.transpose() * xe_rh);
+	MatrixXd nume = (xe_lh.transpose() * ye_lh + xe_rh.transpose() * ye_rh);
+	double alpha = 1./( deno(0,0) + 1.e-10) * (nume(0,0));
+
+	hand_error   = 0.5*(this->compute_hand_error_norm(ioSM_, ctrl_param, des_pose_lh, "left") + this->compute_hand_error_norm(ioSM_, ctrl_param, des_pose_rh, "right"));
+	// time2contact = -1./alpha * log(hand_error_tol/hand_error); // + yarp::os::Time::now();
+	double t2c = -1./alpha * log(hand_error_tol/hand_error); // + yarp::os::Time::now();
+
+	// cout << " XXXXXXXXXXXXXXXXX  deno(0,0) XXXXXXXXXXXXXX IS : " << deno(0,0) << endl; 
+	// cout << " XXXXXXXXXXXXXXXXX  nume(0,0) XXXXXXXXXXXXXX IS : " << nume(0,0) << endl; 
+	// cout << " XXXXXXXXXXXXXXXXX  alpha     XXXXXXXXXXXXXX IS : " << alpha << endl; 
+	// cout << " XXXXXXXXXXXXXXXXX  hand_error XXXXXXXXXXXXXX IS : " << hand_error << endl; 
+
+	return t2c;
+}
+
+// 
+Matrix6d TasksReferences::WrenchMapMx(Vector7d pose)
+{
+	Matrix6d wMap = MatrixXd::Identity(6,6);
+	wMap.block<3,3>(0,0) = Transforms.PoseVector2HomogenousMx(pose).block(0,0,3,3);
+	wMap.block<3,3>(3,3) = wMap.block<3,3>(0,0);
+
+	return wMap;
+}
+
+Vector6d TasksReferences::RotateWrench(Vector7d pose, Vector6d Wrench)
+{
+	return WrenchMapMx(pose) * Wrench;
+	// return Wrench;
+}

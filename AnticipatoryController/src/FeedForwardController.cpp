@@ -2561,18 +2561,21 @@ bool FeedForwardController::check_reachability_batch(WbRobotModel& robot_model_,
             reach_batch_start = false;
 
             std::cout<< "REACHABILITY YES : " << 1.0 << std::endl;
-        }
-        //
-        WBIK.des_jts_pos  = WBIK.virt_jts_pos;
-        WBIK.des_WHB      = WBIK.virt_WHB;  
 
-        // cout << " Desired Joint position are : \n" << 180./M_PI * des_jts_pos.transpose() << endl;
-        cout << " Desired Joint position Torso are : \t" << 180./M_PI * WBIK.des_jts_pos.head(3).transpose() << endl;
-        cout << " Desired Joint position Lhand are : \t" << 180./M_PI * WBIK.des_jts_pos.head(10).tail(7).transpose() << endl;
-        cout << " Desired Joint position Rhand are : \t" << 180./M_PI * WBIK.des_jts_pos.head(17).tail(7).transpose() << endl;
-        cout << " Desired Joint position Lleg  are : \t" << 180./M_PI * WBIK.des_jts_pos.tail(12).head(6).transpose() << endl;
-        cout << " Desired Joint position Rleg  are : \t" << 180./M_PI * WBIK.des_jts_pos.tail(6).transpose() << endl;
-        cout << " Desired Base transformation  is : \n" << WBIK.des_WHB << endl;
+            //
+            WBIK.des_jts_pos  = WBIK.virt_jts_pos;
+            WBIK.des_WHB      = WBIK.virt_WHB;  
+
+            // cout << " Desired Joint position are : \n" << 180./M_PI * des_jts_pos.transpose() << endl;
+            cout << " Desired Joint position Torso are : \t" << 180./M_PI * WBIK.des_jts_pos.head(3).transpose() << endl;
+            cout << " Desired Joint position Lhand are : \t" << 180./M_PI * WBIK.des_jts_pos.head(10).tail(7).transpose() << endl;
+            cout << " Desired Joint position Rhand are : \t" << 180./M_PI * WBIK.des_jts_pos.head(17).tail(7).transpose() << endl;
+            cout << " Desired Joint position Lleg  are : \t" << 180./M_PI * WBIK.des_jts_pos.tail(12).head(6).transpose() << endl;
+            cout << " Desired Joint position Rleg  are : \t" << 180./M_PI * WBIK.des_jts_pos.tail(6).transpose() << endl;
+            cout << " Desired Base transformation  is : \n" << WBIK.des_WHB << endl;
+
+        }
+        
 
     }
     else if((w_aH_pos-w_aF_pos).norm() > WBIK.max_reach)
@@ -2655,6 +2658,7 @@ bool FeedForwardController::get_FMMCoM_batch(WbRobotModel& robot_model_, VectorX
             ik_run = cnt || WBIK.getTaskCompletionState();
             // --------------------------------------------
 
+            std::cout<< "Bal_Pertubation : " << Bal_Pertubation.transpose() << std::endl;
             std::cout<< "FMMCOM BATCH LCOUNT : " << l_count << std::endl;
             std::cout<< "FMMCOM BATCH GCOUNT : " << g_count << std::endl;
             //

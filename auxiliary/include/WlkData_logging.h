@@ -41,7 +41,7 @@ class WlkData_logging
 
         ~WlkData_logging();
 
-        void InitializeLogger();
+        void InitializeLogger(std::string data_number);
 
         void Write_Data(double SamplingTime,
                         int Cycle_counter,

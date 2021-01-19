@@ -122,6 +122,9 @@ class ioStateManager : public yarp::os::RateThread
 	Matrix4d w_H_absF;		// absolute foot frame homogeneous transformation
 	Vector7d w_Pose_absF; 	// absolute foot frame pose
 
+	Vector7d w_Pose_laFTs;
+	Vector7d w_Pose_raFTs;
+
 	//
 	//
     Eigen::Matrix<double, 6, 7> Jac_larm_hand;
@@ -130,6 +133,12 @@ class ioStateManager : public yarp::os::RateThread
     //
     Eigen::MatrixXd		Jacobian_SoT_top6;
     Vector6d		DJacobianDq_SoT_top6;
+
+
+	// joints command vector
+	VectorXd Joints_pos_cmds;
+	VectorXd Joints_vel_cmds;
+	VectorXd Joints_pos_filtered_cmds;
 	// Ports of input variables
 	// =======================+
     // CoP constraints matrix
@@ -159,6 +168,8 @@ class ioStateManager : public yarp::os::RateThread
 	bool UpdateStanceFoot(ContactsStates Cont_States, std::string& stance_foot);
 	void SendTorqueCommands(VectorXd Tau_actuated_);
 	void copy_whole_body_poses2array8(Vector7d (&wbPoses)[8]);
+
+	bool SwitchControlModes(char c);
 };
 
 #endif // ioStateManager_H

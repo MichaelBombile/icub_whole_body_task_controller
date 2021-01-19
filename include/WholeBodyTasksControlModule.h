@@ -342,6 +342,10 @@ class WholeBodyTasksControlModule : public yarp::os::RFModule
         bool StepCompleted;
         bool StepInitiated;
         bool StartRelease;
+        bool userExtWrench;
+        bool isAnticipActive;
+        bool noExtWrench;
+        bool userSendExtWrench;
 
         Vector3d StepFoot_1;
         Vector3d StepFoot_2;
@@ -354,6 +358,7 @@ class WholeBodyTasksControlModule : public yarp::os::RFModule
         //
         double kp_grasp;
         double F_grasp;
+        double F_ext_z;
         double durationExtWrench;
         double timeExtWrench;
         bool   isExtWrench;
@@ -361,11 +366,16 @@ class WholeBodyTasksControlModule : public yarp::os::RFModule
         Vector6d ExtWrench_2;
         Vector6d Expected_ExtWrench_1;
         Vector6d Expected_ExtWrench_2;
+        Matrix3d w_R_pelvis;
         int iter_sm;
         VectorXd Disturb_cx_ ;
         VectorXd Disturb_cy_ ;
         Vector6d External_Wrench_Object;
         Vector2d ref_CoM_xy;
+
+        double time2contact;
+        double time2release;
+        double time2lift;
         // //
         // Eigen::Matrix<double, 6, 7> Jac_larm_hand;
         // Eigen::Matrix<double, 6, 7> Jac_rarm_hand;

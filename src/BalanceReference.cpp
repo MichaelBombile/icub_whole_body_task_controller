@@ -311,7 +311,8 @@ void BalanceReference::generate_step_commands(WbRobotModel& m_robot_model_, ioSt
         this->make_step(ioSM_);
         this->get_leg_inverseKin(m_robot_model_, ioSM_, this->rbase_H_des_lfoot, this->rbase_H_des_rfoot, Joints_pos_cmds);
         // adjust torso picth angle
-        Joints_pos_cmds(2) = d_theta_torso_pitch_; //* step_ctrl.CpBalWlkController->dx_com_normalized;
+        // Joints_pos_cmds(2) = d_theta_torso_pitch_; //* step_ctrl.CpBalWlkController->dx_com_normalized;
+        Joints_pos_cmds(2) = 0.90*Joints_pos_cmds(2) + 0.1*d_theta_torso_pitch_; //* step_ctrl.CpBalWlkController->dx_com_normalized;
 
         if(step_ctrl.Parameters->StanceIndicator[0] == 1) stance_ft = "left";
         else    stance_ft = "right";

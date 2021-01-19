@@ -331,7 +331,7 @@ void wb_InverseKinematics::InitializeWBIK(WbRobotModel& robot_model_, VectorXd j
 
 	task_weight_fmmcom[2] *=10.;
 	task_weight_fmmcom[3] *=10.;
-	task_weight_fmmcom[4] *=1.;
+	task_weight_fmmcom[4] *=1.;     // 1.
 	task_weight_fmmcom[0] *=20.0;
 	task_weight_fmmcom[1] *=20.0;
 
@@ -560,7 +560,7 @@ bool wb_InverseKinematics::load_wbIK_PoseTask()
 	// regularization
 			J_T_Wx_J += Weight_velocity.asDiagonal() * (1./m_massMatrix(0,0)) * m_massMatrix; //MatrixXd::Identity(nJts+6, nJts+6);
 
-	J_T_Wx_J *=0.5;
+	// J_T_Wx_J *=0.5;
 
 	return true;
 }
@@ -638,7 +638,7 @@ bool wb_InverseKinematics::load_wbIK_PoseTask_as(string stanceFoot)
 	// regularization
 			J_T_Wx_J += Weight_velocity.asDiagonal() * (1./m_massMatrix(0,0)) * m_massMatrix; //MatrixXd::Identity(nJts+6, nJts+6);
 
-	J_T_Wx_J *=0.5;
+	// J_T_Wx_J *=0.5;
 
 	return true;
 }
@@ -724,7 +724,7 @@ bool wb_InverseKinematics::load_wbIK_VeloTask(Vector6d des_Velo_EE_[])
 	// regularization
 			J_T_Wx_J += Weight_velocity.asDiagonal() * (1./m_massMatrix(0,0)) * m_massMatrix; //MatrixXd::Identity(nJts+6, nJts+6);
 
-	J_T_Wx_J *=0.5;
+	// J_T_Wx_J *=0.5;
 
 	return true;
 }
@@ -792,7 +792,7 @@ bool wb_InverseKinematics::load_wbIK_VeloTask2(Vector6d des_Velo_EE_[], VectorXd
 			// J_T_Wx_J += Weight_velocity.asDiagonal() * (100./m_massMatrix(0,0)) * m_massMatrix; //MatrixXd::Identity(nJts+6, nJts+6);
 			J_T_Wx_J += Weight_velocity.asDiagonal() * (1./m_massMatrix(0,0)) * m_massMatrix; //MatrixXd::Identity(nJts+6, nJts+6);
 
-	J_T_Wx_J *=0.5;
+	// J_T_Wx_J *=0.5;
 
 	return true;
 }

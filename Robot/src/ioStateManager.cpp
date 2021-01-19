@@ -45,6 +45,9 @@ ioStateManager::ioStateManager(int period, std::string robotName, int actuatedDo
 								, ee_contacts(5)
 								// command
 								, Joints_cmds(actuatedDofs)
+								, Joints_pos_cmds(actuatedDofs)
+								, Joints_pos_filtered_cmds(actuatedDofs)
+								, Joints_vel_cmds(actuatedDofs)
 								, stance_foot(stanceFoot)
 								, w_H_lfoot(w_H_lf)
 								, w_H_rfoot(w_H_rf)
@@ -162,6 +165,11 @@ bool ioStateManager::threadInit()
 	//
 	w_Pose_absF	= W_Pose_aF_;
 	w_H_absF    = Transforms.PoseVector2HomogenousMx(w_Pose_absF); 
+
+	//
+	Joints_pos_cmds          = m_wb_joints_sensor.position;
+    Joints_pos_filtered_cmds = m_wb_joints_sensor.position;
+    Joints_vel_cmds.setZero();
 	
 	
 	// update the robot state
@@ -354,6 +362,9 @@ bool ioStateManager::get_Fwd_Kinematics_and_DynamicsVariables()
 	ok = ok && robot_model.getLinkPose(m_wb_joints_sensor.position, world_H_fBase, "Pelvis", 	 wbTS.Pelvis.Pose);
 	ok = ok && robot_model.getLinkPose(m_wb_joints_sensor.position, world_H_fBase, "Chest",  	 wbTS.Chest.Pose);
 	ok = ok && robot_model.getLinkPose(m_wb_joints_sensor.position, world_H_fBase, "CoM",  		 wbTS.CoM.Pose);
+	ok = ok && robot_model.getLinkPose(m_wb_joints_sensor.position, world_H_fBase, "l_arm_FT", 	 w_Pose_laFTs);
+	ok = ok && robot_model.getLinkPose(m_wb_joints_sensor.position, world_H_fBase, "r_arm_FT",   w_Pose_raFTs);
+	
 	//
 	w_H_lfoot = Transforms.PoseVector2HomogenousMx(wbTS.lfoot.Pose);
 	w_H_rfoot = Transforms.PoseVector2HomogenousMx(wbTS.rfoot.Pose);
@@ -413,4 +424,50 @@ void ioStateManager::copy_whole_body_poses2array8(Vector7d (&wbPoses)[8])
     wbPoses[5] = this->wbTS.Pelvis.Pose;   // Angular momentum
     wbPoses[6] = this->wbTS.Pelvis.Pose;   // Pelvis
     wbPoses[7] = this->wbTS.Chest.Pose;    // Chest
+}
+
+bool ioStateManager::SwitchControlModes(char c)
+{
+    switch(c)
+    {
+        case '1': {
+            ctrl_param.writeCommands = !ctrl_param.writeCommands;
+            ctrl_param.AllPositionArmsTorqueMode = false;
+            // Joints_pos_filtered_cmds = Joints_pos_cmds = ioSM.JtsStates.position; //m_joints_sensor_wb.position;
+            
+            if (ctrl_param.writeCommands) {
+                robot_model.robot_interface.setWholeBodyControlMode(robot_model.robot_interface.CONTROL_MODE_TORQUE);
+            } else {
+                robot_model.robot_interface.setWholeBodyControlMode(robot_model.robot_interface.CONTROL_MODE_POSITION_DIRECT);
+            }
+            // allow safe change of control mode
+            // yarp::os::Time::delay(0.150);
+            yarp::os::Time::delay(0.010);
+
+        }   break;
+
+        case '2': {
+            ctrl_param.AllPositionArmsTorqueMode = !ctrl_param.AllPositionArmsTorqueMode;
+            ctrl_param.writeCommands = false;
+            if(ctrl_param.AllPositionArmsTorqueMode){
+                    robot_model.robot_interface.setWholeBodyPostionArmsTorqueModes("DIRECT");                      
+            } else {
+                robot_model.robot_interface.setWholeBodyControlMode(robot_model.robot_interface.CONTROL_MODE_POSITION_DIRECT);
+            }
+            // allow safe change of control mode
+            yarp::os::Time::delay(0.01);
+        }   break;
+
+        case '3': {
+            ctrl_param.writeCommands = false;
+            ctrl_param.AllPositionArmsTorqueMode = false;
+            robot_model.robot_interface.setWholeBodyControlMode(robot_model.robot_interface.CONTROL_MODE_POSITION_DIRECT);
+            // allow safe change of control mode
+            yarp::os::Time::delay(0.01);
+        }   break;
+    }
+    //
+    Joints_pos_filtered_cmds = Joints_pos_cmds = this->JtsStates.position; //m_joints_sensor_wb.position;
+    //
+    return true;
 }

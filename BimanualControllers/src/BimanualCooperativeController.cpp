@@ -161,7 +161,7 @@ bool BimanualCooperativeController::getGraspKineDynVariables(	Vector7d object_po
 	world_Xstar_desrhand.block<3,3>(0,0) = w_R_rh;
 	world_Xstar_desrhand.block<3,3>(3,3) = w_R_rh;
 	//
-	double min_Fz = 15.0;
+	double min_Fz = 18.0; //15.0;
 	//
 	this->setMinNormalForcesHands(min_Fz, w_R_lh, wrench_correction_lh);
 	this->setMinNormalForcesHands(min_Fz, w_R_rh, wrench_correction_rh);
@@ -251,7 +251,7 @@ void BimanualCooperativeController::check_contact_confidence(	Matrix4d w_H_cp_l,
 	double l_exy = lh_er.head(2).norm();
 	double r_exy = rh_er.head(2).norm();
 	bool tsk = false; 
-	if((lh_er.head(2).norm() <= 1.2*tol_dist2contact) && (rh_er.head(2).norm() <= 1.2*tol_dist2contact)) tsk = true;
+	if((lh_er.head(2).norm() <= 1.35*tol_dist2contact) && (rh_er.head(2).norm() <= 1.35*tol_dist2contact)) tsk = true;
 	else tsk = false;
 	//
 	dist2contact_lh = (lh_er(2));

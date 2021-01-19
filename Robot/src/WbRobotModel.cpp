@@ -539,6 +539,8 @@ bool WbRobotModel::getLinkPose(Eigen::VectorXd jts_pos, Matrix4d w_H_B_, std::st
         else if(frame_name == "right_foot")     frame_id_ = "r_sole";
         else if(frame_name == "Chest")          frame_id_ = "chest";
         else if(frame_name == "Pelvis")         frame_id_ = "root_link";
+        else if(frame_name == "l_arm_FT")       frame_id_ = "l_upper_arm";
+        else if(frame_name == "r_arm_FT")       frame_id_ = "r_upper_arm";
         //
         this->getFrame_Index(frame_id_,    frameIdx_);
         //
